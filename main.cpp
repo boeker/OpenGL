@@ -172,18 +172,18 @@ int main(int argc, char *argv[]) {
     glGenVertexArrays(1, &VAOTwo);
     glBindVertexArray(VAOTwo);
 
-    unsigned int VBOTwo; // vertex buffer object
-    glGenBuffers(1, &VBOTwo);
-    glBindBuffer(GL_ARRAY_BUFFER, VBOTwo);
+    //unsigned int VBOTwo; // vertex buffer object
+    //glGenBuffers(1, &VBOTwo);
+    //glBindBuffer(GL_ARRAY_BUFFER, VBOTwo);
 
-    // vertices forming two triangle forming a rectangle
-    float verticesTwo[] = {
-         0.5f,  0.5f,  0.0f, // top right
-         0.5f, -0.5f,  0.0f, // bottom right
-        -0.5f, -0.5f,  0.0f, // bottom left
-        -0.5f,  0.5f,  0.0f  // top left
-    };
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verticesTwo), verticesTwo, GL_STATIC_DRAW);
+    //// vertices forming two triangle forming a rectangle
+    //float verticesTwo[] = {
+    //     0.5f,  0.5f,  0.0f, // top right
+    //     0.5f, -0.5f,  0.0f, // bottom right
+    //    -0.5f, -0.5f,  0.0f, // bottom left
+    //    -0.5f,  0.5f,  0.0f  // top left
+    //};
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(verticesTwo), verticesTwo, GL_STATIC_DRAW);
 
     unsigned int EBOTwo; // element buffer object
     glGenBuffers(1, &EBOTwo);
