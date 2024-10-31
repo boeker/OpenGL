@@ -1,10 +1,13 @@
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
+#include "stb_image.h"
 
 #include <iostream>
 #include <cmath>
 
 #include "shader.h"
+
+float mixFactor = 0.5f;
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     std::cout << "framebuffer_size_callback " << width << "x" << height << std::endl;
@@ -14,6 +17,14 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS && mixFactor < 1.0f) {
+        mixFactor += 0.01f;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS && mixFactor > 0.0f) {
+        mixFactor -= 0.01f;
     }
 }
 
@@ -58,11 +69,11 @@ int main(int argc, char *argv[]) {
 
     // vertices forming two triangle forming a rectangle
     float vertices[] = {
-         // positions         // colors
-         0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, // top right
-         0.5f, -0.5f,  0.0f,  0.0f,  1.0f,  0.0f, // bottom right
-        -0.5f, -0.5f,  0.0f,  0.0f,  0.0f,  1.0f, // bottom left
-        -0.5f,  0.5f,  0.0f,  1.0f,  1.0f,  0.0f // top left
+         // positions         // colors            // texture coords 
+         0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f, // top right
+         0.5f, -0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f, // bottom right
+        -0.5f, -0.5f,  0.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f, // bottom left
+        -0.5f,  0.5f,  0.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f  // top left
     };
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
@@ -78,14 +89,60 @@ int main(int argc, char *argv[]) {
 
     // tell OpenGL how to interpret our vertex data
     // location of position vertex attribute is 0, consists of 3 values of type GL_FLOAT
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     // location of color vertex attribute is 1, consists of 3 values of type GL_FLOAT
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     // wireframe mode
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    unsigned int texture1;
+    glGenTextures(1, &texture1);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int width, height, numberOfChannels;
+    unsigned char *data = stbi_load("textures/container.jpg", &width, &height, &numberOfChannels, 0);
+    
+    if (data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    } else {
+        std::cerr << "ERROR::TEXTURE::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
+    }
+
+    stbi_image_free(data);
+
+    unsigned int texture2;
+    glGenTextures(1, &texture2);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    data = stbi_load("textures/wall.jpg", &width, &height, &numberOfChannels, 0);
+    
+    if (data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    } else {
+        std::cerr << "ERROR::TEXTURE::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
+    }
+
+    stbi_image_free(data);
 
     // render loop
     while (!glfwWindowShouldClose(window)) {
@@ -96,15 +153,20 @@ int main(int argc, char *argv[]) {
         glClearColor(0.0f, 0.5f, 0.5f, 1.0f); // state-setting function
         glClear(GL_COLOR_BUFFER_BIT); // state-using function
 
-        //float timeValue = glfwGetTime();
-        //float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-        //int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-
         // activate program object
         shader.use();
+        glUniform1i(glGetUniformLocation(shader.programID, "texture1"), 0);
+        glUniform1i(glGetUniformLocation(shader.programID, "texture2"), 1);
 
-        // sets the uniform on the currently active shader program
-        //glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+        //float timeValue = glfwGetTime();
+        //shader.setFloat("offsetX", sin(timeValue) / 2.0f);
+        //shader.setFloat("offsetY", cos(timeValue) / 2.0f);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);
+
+        glUniform1f(glGetUniformLocation(shader.programID, "mixFactor"), mixFactor);
 
         // bind vertex array object
         glBindVertexArray(VAO);
