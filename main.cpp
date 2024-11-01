@@ -12,6 +12,10 @@
 
 float mixFactor = 0.5f;
 
+float cameraX = 0.0f;
+float cameraY = 0.0f;
+float cameraZ = 3.0f;
+
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     std::cout << "framebuffer_size_callback " << width << "x" << height << std::endl;
     glViewport(0, 0, width, height);
@@ -28,6 +32,30 @@ void processInput(GLFWwindow *window) {
 
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS && mixFactor > 0.0f) {
         mixFactor -= 0.01f;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        cameraZ -= 0.05f;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        cameraZ += 0.05f;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        cameraX -= 0.05f;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        cameraX += 0.05f;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        cameraY += 0.05f;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+        cameraY -= 0.05f;
     }
 }
 
@@ -222,7 +250,7 @@ int main(int argc, char *argv[]) {
         //shader.setFloat("offsetY", cos(timeValue) / 2.0f);
 
         glm::mat4 view = glm::mat4(1.0f);
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        view = glm::translate(view, glm::vec3(-cameraX, -cameraY, -cameraZ));
         glUniformMatrix4fv(glGetUniformLocation(shader.programID, "view"), 1, GL_FALSE, glm::value_ptr(view));
 
         glm::mat4 projection;
