@@ -1,5 +1,8 @@
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 #include "stb_image.h"
 
 #include <iostream>
@@ -158,9 +161,16 @@ int main(int argc, char *argv[]) {
         glUniform1i(glGetUniformLocation(shader.programID, "texture1"), 0);
         glUniform1i(glGetUniformLocation(shader.programID, "texture2"), 1);
 
-        //float timeValue = glfwGetTime();
+        float timeValue = glfwGetTime();
         //shader.setFloat("offsetX", sin(timeValue) / 2.0f);
         //shader.setFloat("offsetY", cos(timeValue) / 2.0f);
+
+        glm::mat4 trans = glm::mat4(1.0f);
+        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+        trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 0.0f));
+        trans = glm::rotate(trans, timeValue, glm::vec3(0.0f, 0.0f, 1.0f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.programID, "transform"), 1, GL_FALSE, glm::value_ptr(trans));
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
         glActiveTexture(GL_TEXTURE1);
@@ -172,6 +182,14 @@ int main(int argc, char *argv[]) {
         glBindVertexArray(VAO);
 
         // draw triangle
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        trans = glm::mat4(1.0f);
+        trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
+        float scaleFact = sin(timeValue) + 0.0f;
+        trans = glm::scale(trans, glm::vec3(scaleFact, scaleFact, 0.0f));
+        //trans = glm::rotate(trans, timeValue, glm::vec3(0.0f, 0.0f, 1.0f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.programID, "transform"), 1, GL_FALSE, glm::value_ptr(trans));
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         // swap buffers
