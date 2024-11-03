@@ -1,7 +1,7 @@
 #include "camera.h"
 
 Camera::Camera() {
-    position = glm::vec3(0.0f, 0.0f, 3.0f);
+    position = glm::vec3(0.0f, 3.0f, 3.0f);
     front = glm::vec3(0.0f, 0.0f, -1.0f);
     up = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -12,6 +12,9 @@ Camera::Camera() {
 
     movementSpeed = 5.0f;
     sensitivity = 0.1f;
+
+    velocity = 0.0f;
+    falling = true;
 }
 
 glm::mat4 Camera::getViewMatrix() const {
@@ -19,6 +22,7 @@ glm::mat4 Camera::getViewMatrix() const {
 }
 
 void Camera::processMovement(Direction direction, float deltaTime) {
+    float previousHeight = position.y;
     const float cameraSpeed = movementSpeed * deltaTime;
 
     if (direction == Direction::FORWARD) {
@@ -37,7 +41,7 @@ void Camera::processMovement(Direction direction, float deltaTime) {
         position += cameraSpeed * glm::normalize(glm::cross(front, up));
     }
 
-    //position.y = 0.0f;
+    position.y = previousHeight;
 }
 
 void Camera::processDirectionChange(float yawOffset, float pitchOffset) {
@@ -65,5 +69,15 @@ void Camera::processFOVChange(float offset) {
     }
     if (fov > 45.0f) {
         fov = 45.0f;
+    }
+}
+
+void Camera::processGravity(float deltaTime) {
+    if (falling) {
+        float newVelocity = velocity + GRAVITY * deltaTime;
+        float displacement = deltaTime * (velocity + newVelocity) / 2.0f;
+        position.y -= displacement;
+
+        velocity = newVelocity;
     }
 }

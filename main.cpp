@@ -77,9 +77,17 @@ void processInput(GLFWwindow *window) {
     }
 
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-        camera.movementSpeed = 50.0f;
+        camera.movementSpeed = 15.0f;
     } else {
         camera.movementSpeed = 5.0f;
+    }
+    
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        if (!camera.falling) {
+            camera.falling = true;
+            //camera.position.y += 6.0f;
+            camera.velocity = -8.0f;
+        }
     }
 }
 
@@ -284,7 +292,7 @@ int main(int argc, char *argv[]) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    data = stbi_load("textures/ground.jpg", &width, &height, &numberOfChannels, 0);
+    data = stbi_load("textures/moon2.jpg", &width, &height, &numberOfChannels, 0);
     
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -335,7 +343,18 @@ int main(int argc, char *argv[]) {
         //shader.setFloat("offsetY", cos(timeValue) / 2.0f);
 
         float currentHeight = myWorldMap.getHeight(camera.position.x, camera.position.z);
-        camera.position.y = currentHeight + 1.8f;
+
+        if (camera.position.y > currentHeight + 1.8f && !camera.falling) {
+            camera.falling = true;
+            camera.velocity = 0.0f;
+        }
+
+        camera.processGravity(deltaTime);
+        if (camera.position.y < currentHeight + 1.8f) {
+            camera.falling = false;
+            camera.velocity = 0.0f;
+            camera.position.y = currentHeight + 1.8f;
+        }
 
         glUniformMatrix4fv(glGetUniformLocation(shader.programID, "view"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
 
