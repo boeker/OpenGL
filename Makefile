@@ -1,15 +1,18 @@
 FLAGS = -g -Wall -lglfw
 
-main: main.o glad.o shader.o stb_image.o camera.o
-	g++ $(FLAGS) main.o glad.o shader.o stb_image.o camera.o -o main
+main: main.o glad.o shader.o stb_image.o camera.o worldmap.o
+	g++ $(FLAGS) main.o glad.o shader.o stb_image.o camera.o worldmap.o -o main
 
 main.o: main.cpp
 	g++ $(FLAGS) -c main.cpp
 
-camera.o: camera.cpp
+camera.o: camera.h camera.cpp
 	g++ $(FLAGS) -c camera.cpp
 
-shader.o: shader.cpp
+worldmap.o: worldmap.h worldmap.cpp
+	g++ $(FLAGS) -c worldmap.cpp
+
+shader.o: shader.h shader.cpp
 	g++ $(FLAGS) -c shader.cpp
 
 glad.o: glad.c

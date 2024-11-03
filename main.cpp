@@ -10,6 +10,7 @@
 
 #include "shader.h"
 #include "camera.h"
+#include "worldmap.h"
 
 float mixFactor = 0.5f;
 
@@ -189,6 +190,38 @@ int main(int argc, char *argv[]) {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
+    unsigned int VAOMap; // vertex attribute object
+    glGenVertexArrays(1, &VAOMap);
+    glBindVertexArray(VAOMap);
+
+    unsigned int VBOMap; // vertex buffer object
+    glGenBuffers(1, &VBOMap);
+    glBindBuffer(GL_ARRAY_BUFFER, VBOMap);
+
+    WorldMap myWorldMap;
+    myWorldMap.generateMap();
+
+    //int mapSize = 30;
+    //float map[] = {
+    //     0.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+    //     1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+    //     0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+    //     //
+    //     1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+    //     0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+    //     1.0f, -0.2f, -1.0f,  1.0f, 1.0f,
+    //};
+    int mapSize = myWorldMap.generateVertexList();
+    float *map = myWorldMap.vertexList;
+    std::cout << mapSize << std::endl;
+    glBufferData(GL_ARRAY_BUFFER, mapSize * sizeof(float), map, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
     // wireframe mode
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -203,7 +236,7 @@ int main(int argc, char *argv[]) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     int width, height, numberOfChannels;
-    unsigned char *data = stbi_load("textures/container.jpg", &width, &height, &numberOfChannels, 0);
+    unsigned char *data = stbi_load("textures/wall.jpg", &width, &height, &numberOfChannels, 0);
     
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -224,7 +257,7 @@ int main(int argc, char *argv[]) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    data = stbi_load("textures/wall.jpg", &width, &height, &numberOfChannels, 0);
+    data = stbi_load("textures/container.jpg", &width, &height, &numberOfChannels, 0);
     
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -236,6 +269,27 @@ int main(int argc, char *argv[]) {
     stbi_image_free(data);
 
     glEnable(GL_DEPTH_TEST);
+
+    unsigned int textureGround;
+    glGenTextures(1, &textureGround);
+    glBindTexture(GL_TEXTURE_2D, textureGround);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    data = stbi_load("textures/ground.jpg", &width, &height, &numberOfChannels, 0);
+    
+    if (data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    } else {
+        std::cerr << "ERROR::TEXTURE::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
+    }
+
+    stbi_image_free(data);
+
+
     
     
     glm::vec3 cubePositions[] = {
@@ -268,13 +322,13 @@ int main(int argc, char *argv[]) {
         shader.use();
         glUniform1i(glGetUniformLocation(shader.programID, "texture1"), 0);
         glUniform1i(glGetUniformLocation(shader.programID, "texture2"), 1);
+        //glUniform1i(glGetUniformLocation(shader.programID, "texture2"), 1);
 
         //float timeValue = glfwGetTime();
         //shader.setFloat("offsetX", sin(timeValue) / 2.0f);
         //shader.setFloat("offsetY", cos(timeValue) / 2.0f);
 
-        glm::mat4 view = glm::lookAt(camera.position, camera.position + camera.front, camera.up);
-        glUniformMatrix4fv(glGetUniformLocation(shader.programID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(shader.programID, "view"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
 
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(camera.fov), 1280.0f / 720.0f, 0.1f, 100.0f);
@@ -301,6 +355,15 @@ int main(int argc, char *argv[]) {
             // draw triangle
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, textureGround);
+
+        glBindVertexArray(VAOMap);
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, -1.8f, 0.0f));
+        shader.setMat4("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, mapSize / 5);
 
         // swap buffers
         glfwSwapBuffers(window);

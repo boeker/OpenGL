@@ -2,6 +2,7 @@
 #define CAMERA_H
 
 #include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 class Camera {
 public:
@@ -14,12 +15,14 @@ public:
 
     float fov;
 
-    float movementSpeed = 5.0f;
+    float movementSpeed = 15.0f;
     float sensitivity = 0.1f;
 
     enum class Direction {FORWARD, BACKWARD, LEFT, RIGHT};
 
     Camera();
+
+    glm::mat4 getViewMatrix() const;
     
     void processMovement(Direction direction, float deltaTime);
     void processDirectionChange(float yawOffset, float pitchOffset);

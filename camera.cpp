@@ -14,6 +14,10 @@ Camera::Camera() {
     sensitivity = 0.1f;
 }
 
+glm::mat4 Camera::getViewMatrix() const {
+    return glm::lookAt(position, position + front, up);
+}
+
 void Camera::processMovement(Direction direction, float deltaTime) {
     const float cameraSpeed = movementSpeed * deltaTime;
 
@@ -33,7 +37,7 @@ void Camera::processMovement(Direction direction, float deltaTime) {
         position += cameraSpeed * glm::normalize(glm::cross(front, up));
     }
 
-    position.y = 0.0f;
+    //position.y = 0.0f;
 }
 
 void Camera::processDirectionChange(float yawOffset, float pitchOffset) {
