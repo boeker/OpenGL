@@ -7,7 +7,7 @@
 
 class WorldMap {
 public:
-    static const int SIZE = 100;
+    static const int SIZE = 200;
 
     float **heightMap;
     float *vertexList;
@@ -17,6 +17,7 @@ public:
 
     void generateMap();
     int generateVertexList();
+    float getHeight(float x, float y);
 };
 
 #endif

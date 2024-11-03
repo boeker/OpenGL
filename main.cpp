@@ -75,6 +75,12 @@ void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         camera.processMovement(Camera::Direction::RIGHT, deltaTime);
     }
+
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        camera.movementSpeed = 50.0f;
+    } else {
+        camera.movementSpeed = 5.0f;
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -302,7 +308,7 @@ int main(int argc, char *argv[]) {
         glm::vec3( 1.3f, -2.0f, -2.5f),  
         glm::vec3( 1.5f,  2.0f, -2.5f), 
         glm::vec3( 1.5f,  0.2f, -1.5f), 
-        glm::vec3(-1.3f,  1.0f, -1.5f)  
+        glm::vec3( 98.8f,  38.0f, 98.5f)  
     };
     
     // render loop
@@ -328,10 +334,13 @@ int main(int argc, char *argv[]) {
         //shader.setFloat("offsetX", sin(timeValue) / 2.0f);
         //shader.setFloat("offsetY", cos(timeValue) / 2.0f);
 
+        float currentHeight = myWorldMap.getHeight(camera.position.x, camera.position.z);
+        camera.position.y = currentHeight + 1.8f;
+
         glUniformMatrix4fv(glGetUniformLocation(shader.programID, "view"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
 
         glm::mat4 projection;
-        projection = glm::perspective(glm::radians(camera.fov), 1280.0f / 720.0f, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(camera.fov), 1280.0f / 720.0f, 0.1f, 300.0f);
         glUniformMatrix4fv(glGetUniformLocation(shader.programID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         
 
@@ -364,6 +373,7 @@ int main(int argc, char *argv[]) {
         model = glm::translate(model, glm::vec3(0.0f, -1.8f, 0.0f));
         shader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, mapSize / 5);
+
 
         // swap buffers
         glfwSwapBuffers(window);

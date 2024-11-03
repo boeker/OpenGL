@@ -15,8 +15,8 @@ public:
 
     float fov;
 
-    float movementSpeed = 15.0f;
-    float sensitivity = 0.1f;
+    float movementSpeed;
+    float sensitivity;
 
     enum class Direction {FORWARD, BACKWARD, LEFT, RIGHT};
 

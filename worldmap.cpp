@@ -41,6 +41,11 @@ void WorldMap::generateMap() {
 
             int heightOffset = (rand() % 100) - 50;
             float heightOffsetFloat = (float)heightOffset / 100.0f;
+            if (y < 100 && x < 100) {
+                heightOffsetFloat += 0.2f;
+            } else {
+                heightOffsetFloat -= 0.2f;
+            }
 
             heightMap[x][y] = average + heightOffsetFloat;
         }
@@ -104,4 +109,22 @@ int WorldMap::generateVertexList() {
 
     return arraySize;
 }
-    
+
+float WorldMap::getHeight(float x, float y) {
+    if (x < 0 || y < 0 || x > SIZE || y > SIZE) {
+        return -std::numeric_limits<float>::infinity();
+    }
+
+    int xInt = (int)floor(x);
+    int yInt = (int)floor(y);
+
+    float ll = heightMap[xInt][yInt]; 
+    float lr = heightMap[xInt + 1][yInt]; 
+    float ul = heightMap[xInt][yInt + 1]; 
+    float ur = heightMap[xInt + 1][yInt + 1]; 
+
+    float s = x - (float)xInt;
+    float t = y - (float)yInt;
+
+    return (1 - t) * ((1 - s) * ll + s * lr) + t * ((1 - s) * ul + s * ur);
+} 
