@@ -12,8 +12,54 @@
 #include "camera.h"
 #include "worldmap.h"
 #include "game.h"
+#include "gameobject.h"
 
 #include "texture.h"
+#include "model.h"
+
+float cubeVertices[] = {
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+};
 
 float mixFactor = 0.5f;
 
@@ -132,119 +178,6 @@ int main(int argc, char *argv[]) {
 
     Shader shader("shaders/shader.vs", "shaders/shader.fs");
 
-    unsigned int VAO; // vertex attribute object
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    unsigned int VBO; // vertex buffer object
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-    // vertices forming two triangle forming a rectangle
-    //float vertices[] = {
-    //     // positions         // texture coords 
-    //     0.5f,  0.5f,  0.0f,  1.0f,  1.0f, // top right front
-    //     0.5f, -0.5f,  0.0f,  1.0f,  0.0f, // bottom right front
-    //    -0.5f, -0.5f,  0.0f,  0.0f,  0.0f, // bottom left front
-    //    -0.5f,  0.5f,  0.0f,  0.0f,  1.0f  // top left front
-    //};
-    float vertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-    };
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    //unsigned int EBO; // element buffer object
-    //glGenBuffers(1, &EBO);
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-
-    //unsigned int indices[] = {
-    //    0, 1, 3, // first triangle
-    //    1, 2, 3  // second triangle
-    //};
-    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // tell OpenGL how to interpret our vertex data
-    // location of position vertex attribute is 0, consists of 3 values of type GL_FLOAT
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    unsigned int VAOMap; // vertex attribute object
-    glGenVertexArrays(1, &VAOMap);
-    glBindVertexArray(VAOMap);
-
-    unsigned int VBOMap; // vertex buffer object
-    glGenBuffers(1, &VBOMap);
-    glBindBuffer(GL_ARRAY_BUFFER, VBOMap);
-
-    WorldMap myWorldMap;
-    myWorldMap.generateMap();
-
-    //int mapSize = 30;
-    //float map[] = {
-    //     0.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-    //     1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-    //     0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-    //     //
-    //     1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-    //     0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-    //     1.0f, -0.2f, -1.0f,  1.0f, 1.0f,
-    //};
-    int mapSize = myWorldMap.generateVertexList();
-    float *map = myWorldMap.vertexList;
-    std::cout << mapSize << std::endl;
-    glBufferData(GL_ARRAY_BUFFER, mapSize * sizeof(float), map, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    // wireframe mode
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     Texture wallTexture;
     wallTexture.loadFromFile("textures/wall.jpg");
@@ -254,6 +187,32 @@ int main(int argc, char *argv[]) {
 
     Texture groundTexture;
     groundTexture.loadFromFile("textures/moon2.jpg");
+
+    Model cube(wallTexture);
+    cube.setGeometry(cubeVertices, 36);
+    cube.transferGeometry();
+
+    GameObject someCube(&cube, &shader);
+
+    Model crate(containerTexture);
+    crate.setGeometry(cubeVertices, 36);
+    crate.transferGeometry();
+
+    // generate height map and create model
+
+    WorldMap myWorldMap;
+    myWorldMap.generateMap();
+
+    int mapSize = myWorldMap.generateVertexList();
+    float *map = myWorldMap.vertexList;
+
+    Model worldMapModel(groundTexture);
+    worldMapModel.setGeometry(map, mapSize / 5);
+    worldMapModel.transferGeometry();
+
+    GameObject worldMapObject(&worldMapModel, &shader);
+    
+
 
     glEnable(GL_DEPTH_TEST);
 
@@ -289,7 +248,7 @@ int main(int argc, char *argv[]) {
         // activate program object
         shader.use();
         glUniform1i(glGetUniformLocation(shader.programID, "texture1"), 0);
-        glUniform1i(glGetUniformLocation(shader.programID, "texture2"), 1);
+        //glUniform1i(glGetUniformLocation(shader.programID, "texture2"), 1);
         //glUniform1i(glGetUniformLocation(shader.programID, "texture2"), 1);
 
         //float timeValue = glfwGetTime();
@@ -317,20 +276,6 @@ int main(int argc, char *argv[]) {
         glUniformMatrix4fv(glGetUniformLocation(shader.programID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         
 
-        glActiveTexture(GL_TEXTURE0);
-        wallTexture.bind();
-    
-        // activate texture unit
-        glActiveTexture(GL_TEXTURE1);
-        // bind texture to currently activated texture unit
-        containerTexture.bind();
-        
-
-        glUniform1f(glGetUniformLocation(shader.programID, "mixFactor"), mixFactor);
-
-        // bind vertex array object
-        glBindVertexArray(VAO);
-
         for (unsigned int i = 0; i < 10; ++i) {
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
@@ -338,18 +283,12 @@ int main(int argc, char *argv[]) {
             model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
             shader.setMat4("model", model);
 
-            // draw triangle
-            glDrawArrays(GL_TRIANGLES, 0, 36);
+            crate.draw();
         }
+        
+        //someCube.draw();
 
-        glActiveTexture(GL_TEXTURE1);
-        groundTexture.bind();
-
-        glBindVertexArray(VAOMap);
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -1.8f, 0.0f));
-        shader.setMat4("model", model);
-        glDrawArrays(GL_TRIANGLES, 0, mapSize / 5);
+        worldMapObject.draw();
 
 
         // swap buffers

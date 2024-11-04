@@ -1,12 +1,15 @@
 #include "gameobject.h"
 
-GameObject::GameObject() {
+GameObject::GameObject(Model *model, Shader *shader) {
     position = glm::vec3(0.0f, 0.0f, 0.0f);
     front = glm::vec3(0.0f, 0.0f, -1.0f);
     up = glm::vec3(0.0f, 1.0f, 0.0f);
 
     velocity = 0.0f;
     falling = false;
+
+    this->model = model;
+    this->shader = shader;
 }
 
 glm::vec3 GameObject::getPosition() const {
@@ -28,12 +31,11 @@ void GameObject::simulateGravity(float deltaTime) {
 }
 
 void GameObject::draw() {
-    //glm::mat4 model = glm::mat4(1.0f);
-    //model = glm::translate(model, position);
-    ////TODO
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, position);
+    //TODO
     //model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.3f, 0.5f));
-    //shader.setMat4("model", model);
+    shader->setMat4("model", model);
 
-    //// draw triangle
-    //glDrawArrays(GL_TRIANGLES, 0, 36);
+    this->model->draw();
 }

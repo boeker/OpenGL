@@ -5,6 +5,7 @@ CXXSOURCES = main.cpp\
 	camera.cpp\
 	gameobject.cpp\
 	game.cpp\
+	model.cpp\
 	player.cpp\
 	shader.cpp\
 	stb_image.cpp\
@@ -16,6 +17,7 @@ CSOURCES = glad.c
 HEADERS = camera.h\
 	gameobject.h\
 	game.h\
+	model.h\
 	player.h\
 	shader.h\
 	stb_image.h\

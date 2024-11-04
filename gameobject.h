@@ -4,6 +4,7 @@
 #include "glm/glm.hpp"
 
 #include "shader.h"
+#include "model.h"
 
 class GameObject {
 private:
@@ -14,19 +15,16 @@ private:
     float velocity;
     bool falling;
 
-    unsigned int VAO;
-    float *geometry;
-    unsigned int geometryLength;
-    unsigned int texture;
-
+    Model *model;
+    Shader *shader;
 public:
-    GameObject();
+    GameObject(Model *model, Shader *shader);
 
     glm::vec3 getPosition() const;
     void setPosition(const glm::vec3 &newPosition);
 
-    void simulateGravity(float deltaTime);
     void draw();
+    void simulateGravity(float deltaTime);
 };
 
 #endif
