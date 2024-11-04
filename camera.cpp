@@ -12,9 +12,6 @@ Camera::Camera() {
 
     movementSpeed = 5.0f;
     sensitivity = 0.1f;
-
-    velocity = 0.0f;
-    falling = true;
 }
 
 glm::mat4 Camera::getViewMatrix() const {
@@ -72,12 +69,3 @@ void Camera::processFOVChange(float offset) {
     }
 }
 
-void Camera::processGravity(float deltaTime) {
-    if (falling) {
-        float newVelocity = velocity + GRAVITY * deltaTime;
-        float displacement = deltaTime * (velocity + newVelocity) / 2.0f;
-        position.y -= displacement;
-
-        velocity = newVelocity;
-    }
-}

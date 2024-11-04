@@ -4,18 +4,22 @@ CXX = g++
 CXXSOURCES = main.cpp\
 	camera.cpp\
 	gameobject.cpp\
+	game.cpp\
 	player.cpp\
 	shader.cpp\
 	stb_image.cpp\
+	texture.cpp\
 	worldmap.cpp
 
 CSOURCES = glad.c
 
 HEADERS = camera.h\
 	gameobject.h\
+	game.h\
 	player.h\
 	shader.h\
 	stb_image.h\
+	texture.h\
 	worldmap.h
 
 OBJECTS = $(CXXSOURCES:.cpp=.o) $(CSOURCES:.c=.o)

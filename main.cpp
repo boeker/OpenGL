@@ -11,6 +11,9 @@
 #include "shader.h"
 #include "camera.h"
 #include "worldmap.h"
+#include "game.h"
+
+#include "texture.h"
 
 float mixFactor = 0.5f;
 
@@ -243,73 +246,17 @@ int main(int argc, char *argv[]) {
     // wireframe mode
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    unsigned int texture1;
-    glGenTextures(1, &texture1);
-    glBindTexture(GL_TEXTURE_2D, texture1);
+    Texture wallTexture;
+    wallTexture.loadFromFile("textures/wall.jpg");
 
-    // set the texture wrapping/filtering options (on the currently bound texture object)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    Texture containerTexture;
+    containerTexture.loadFromFile("textures/container.jpg");
 
-    int width, height, numberOfChannels;
-    unsigned char *data = stbi_load("textures/wall.jpg", &width, &height, &numberOfChannels, 0);
-    
-    if (data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    } else {
-        std::cerr << "ERROR::TEXTURE::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
-    }
-
-    stbi_image_free(data);
-
-    unsigned int texture2;
-    glGenTextures(1, &texture2);
-    glBindTexture(GL_TEXTURE_2D, texture2);
-
-    // set the texture wrapping/filtering options (on the currently bound texture object)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    data = stbi_load("textures/container.jpg", &width, &height, &numberOfChannels, 0);
-    
-    if (data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    } else {
-        std::cerr << "ERROR::TEXTURE::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
-    }
-
-    stbi_image_free(data);
+    Texture groundTexture;
+    groundTexture.loadFromFile("textures/moon2.jpg");
 
     glEnable(GL_DEPTH_TEST);
 
-    unsigned int textureGround;
-    glGenTextures(1, &textureGround);
-    glBindTexture(GL_TEXTURE_2D, textureGround);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    data = stbi_load("textures/moon2.jpg", &width, &height, &numberOfChannels, 0);
-    
-    if (data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    } else {
-        std::cerr << "ERROR::TEXTURE::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
-    }
-
-    stbi_image_free(data);
-
-
-    
-    
     glm::vec3 cubePositions[] = {
         glm::vec3( 0.0f,  0.0f,  0.0f), 
         glm::vec3( 2.0f,  5.0f, -15.0f), 
@@ -322,6 +269,9 @@ int main(int argc, char *argv[]) {
         glm::vec3( 1.5f,  0.2f, -1.5f), 
         glm::vec3( 98.8f,  38.0f, 98.5f)  
     };
+
+    Game game;
+    game.draw();
     
     // render loop
     while (!glfwWindowShouldClose(window)) {
@@ -353,12 +303,12 @@ int main(int argc, char *argv[]) {
             camera.velocity = 0.0f;
         }
 
-        camera.processGravity(deltaTime);
-        if (camera.position.y < currentHeight + 1.8f) {
-            camera.falling = false;
-            camera.velocity = 0.0f;
-            camera.position.y = currentHeight + 1.8f;
-        }
+        //camera.processGravity(deltaTime);
+        //if (camera.position.y < currentHeight + 1.8f) {
+        //    camera.falling = false;
+        //    camera.velocity = 0.0f;
+        //    camera.position.y = currentHeight + 1.8f;
+        //}
 
         glUniformMatrix4fv(glGetUniformLocation(shader.programID, "view"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
 
@@ -368,9 +318,13 @@ int main(int argc, char *argv[]) {
         
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture1);
+        wallTexture.bind();
+    
+        // activate texture unit
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, texture2);
+        // bind texture to currently activated texture unit
+        containerTexture.bind();
+        
 
         glUniform1f(glGetUniformLocation(shader.programID, "mixFactor"), mixFactor);
 
@@ -389,7 +343,7 @@ int main(int argc, char *argv[]) {
         }
 
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, textureGround);
+        groundTexture.bind();
 
         glBindVertexArray(VAOMap);
         glm::mat4 model = glm::mat4(1.0f);

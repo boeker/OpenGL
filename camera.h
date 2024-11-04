@@ -16,14 +16,13 @@ public:
     float fov;
 
     float movementSpeed;
-    float sensitivity;
-
     bool falling;
 
-    static constexpr float GRAVITY = 9.82f;
     float velocity;
 
     enum class Direction {FORWARD, BACKWARD, LEFT, RIGHT};
+    float sensitivity;
+
 
     Camera();
 
@@ -32,7 +31,6 @@ public:
     void processMovement(Direction direction, float deltaTime);
     void processDirectionChange(float yawOffset, float pitchOffset);
     void processFOVChange(float offset);
-    void processGravity(float deltaTime);
 };
 
 #endif
