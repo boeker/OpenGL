@@ -6,6 +6,8 @@
 #include "shader.h"
 #include "model.h"
 
+class Game;
+
 class GameObject {
 private:
     glm::vec3 position;
@@ -15,13 +17,19 @@ private:
     float velocity;
     bool falling;
 
+    Game *game;
+
     Model *model;
     Shader *shader;
 public:
-    GameObject(Model *model, Shader *shader);
+    enum class Direction {FORWARD, BACKWARD, LEFT, RIGHT};
+
+    GameObject(Model *model, Shader *shader, Game *game);
 
     glm::vec3 getPosition() const;
     void setPosition(const glm::vec3 &newPosition);
+
+    void processMovement(Direction direction, float deltaTime);
 
     void draw();
     void simulateGravity(float deltaTime);

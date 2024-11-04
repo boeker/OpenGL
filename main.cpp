@@ -96,18 +96,11 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
     camera.processFOVChange((float)yoffset);
 }
 
-void processInput(GLFWwindow *window) {
+void processInput(GLFWwindow *window, GameObject *object) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
 
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS && mixFactor < 1.0f) {
-        mixFactor += 0.01f;
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS && mixFactor > 0.0f) {
-        mixFactor -= 0.01f;
-    }
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         camera.processMovement(Camera::Direction::FORWARD, deltaTime);
@@ -123,6 +116,22 @@ void processInput(GLFWwindow *window) {
 
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         camera.processMovement(Camera::Direction::RIGHT, deltaTime);
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+        object->processMovement(GameObject::Direction::FORWARD, deltaTime);
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+        object->processMovement(GameObject::Direction::BACKWARD, deltaTime);
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+        object->processMovement(GameObject::Direction::LEFT, deltaTime);
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+        object->processMovement(GameObject::Direction::RIGHT, deltaTime);
     }
 
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
@@ -188,20 +197,12 @@ int main(int argc, char *argv[]) {
     Texture groundTexture;
     groundTexture.loadFromFile("textures/moon2.jpg");
 
-    Model cube(wallTexture);
-    cube.setGeometry(cubeVertices, 36);
-    cube.transferGeometry();
-
-    GameObject someCube(&cube, &shader);
-
-    Model crate(containerTexture);
-    crate.setGeometry(cubeVertices, 36);
-    crate.transferGeometry();
-
     // generate height map and create model
 
     WorldMap myWorldMap;
     myWorldMap.generateMap();
+    Game game(&myWorldMap);
+    
 
     int mapSize = myWorldMap.generateVertexList();
     float *map = myWorldMap.vertexList;
@@ -210,7 +211,19 @@ int main(int argc, char *argv[]) {
     worldMapModel.setGeometry(map, mapSize / 5);
     worldMapModel.transferGeometry();
 
-    GameObject worldMapObject(&worldMapModel, &shader);
+    GameObject worldMapObject(&worldMapModel, &shader, &game);
+
+    Model cube(wallTexture);
+    cube.setGeometry(cubeVertices, 36);
+    cube.transferGeometry();
+
+    GameObject someCube(&cube, &shader, &game);
+    someCube.setPosition(glm::vec3(0.0f, 10.0f, 0.0f));
+
+    Model crate(containerTexture);
+    crate.setGeometry(cubeVertices, 36);
+    crate.transferGeometry();
+
     
 
 
@@ -229,9 +242,6 @@ int main(int argc, char *argv[]) {
         glm::vec3( 98.8f,  38.0f, 98.5f)  
     };
 
-    Game game;
-    game.draw();
-    
     // render loop
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = glfwGetTime();
@@ -239,7 +249,8 @@ int main(int argc, char *argv[]) {
         lastFrame = currentFrame;
 
         // process input
-        processInput(window);
+        processInput(window, &someCube);
+        someCube.simulateGravity(deltaTime);
 
         // rendering
         glClearColor(0.0f, 0.5f, 0.5f, 1.0f); // state-setting function
@@ -286,7 +297,7 @@ int main(int argc, char *argv[]) {
             crate.draw();
         }
         
-        //someCube.draw();
+        someCube.draw();
 
         worldMapObject.draw();
 

@@ -1,15 +1,18 @@
 #include "gameobject.h"
 
-GameObject::GameObject(Model *model, Shader *shader) {
+#include "game.h"
+
+GameObject::GameObject(Model *model, Shader *shader, Game *game) {
     position = glm::vec3(0.0f, 0.0f, 0.0f);
     front = glm::vec3(0.0f, 0.0f, -1.0f);
     up = glm::vec3(0.0f, 1.0f, 0.0f);
 
     velocity = 0.0f;
-    falling = false;
+    falling = true;
 
     this->model = model;
     this->shader = shader;
+    this->game = game;
 }
 
 glm::vec3 GameObject::getPosition() const {
@@ -21,13 +24,55 @@ void GameObject::setPosition(const glm::vec3 &newPosition) {
 }
 
 void GameObject::simulateGravity(float deltaTime) {
+    float currentHeight = game->worldMap->getHeight(position.x, position.z);
+    std::cout << "current height" << currentHeight << std::endl;
+
+    if (position.y > currentHeight && !falling) {
+        falling = true;
+        velocity = 0.0f;
+    }
+
     if (falling) {
-        float newVelocity = 0.0f; //velocity + GRAVITY * deltaTime;
+        float newVelocity = velocity + Game::GRAVITY * deltaTime;
         float displacement = deltaTime * (velocity + newVelocity) / 2.0f;
         position.y -= displacement;
 
         velocity = newVelocity;
     }
+
+    if (position.y < currentHeight) {
+        falling = false;
+        velocity = 0.0f;
+        position.y = currentHeight;
+    }
+
+    std::cout << "gravity " << position.y << std::endl;
+}
+
+void GameObject::processMovement(Direction direction, float deltaTime) {
+    float previousHeight = position.y;
+    const float cameraSpeed = 5.0f * deltaTime;//movementSpeed * deltaTime;
+
+    if (direction == Direction::FORWARD) {
+        position += cameraSpeed * front;
+    }
+
+    if (direction == Direction::BACKWARD) {
+        position -= cameraSpeed * front;
+    }
+
+    if (direction == Direction::LEFT) {
+        position -= cameraSpeed * glm::normalize(glm::cross(front, up));
+    }
+
+    if (direction == Direction::RIGHT) {
+        position += cameraSpeed * glm::normalize(glm::cross(front, up));
+    }
+
+    //position.y = previousHeight;
+    std::cout << "x" << position.x << std::endl;
+    std::cout << "y" << position.y << std::endl;
+    std::cout << "z" << position.z << std::endl;
 }
 
 void GameObject::draw() {
