@@ -85,9 +85,13 @@ void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
         if (!camera.falling) {
             camera.falling = true;
-            //camera.position.y += 6.0f;
-            camera.velocity = -8.0f;
+            camera.velocity = -9.0f;
         }
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+        camera.falling = true;
+        camera.velocity += -0.22f;
     }
 }
 

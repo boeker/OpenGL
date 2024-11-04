@@ -1,26 +1,39 @@
-FLAGS = -g -Wall -lglfw
+CXXFLAGS = -g -Wall -lglfw
+CXX = g++
 
-main: main.o glad.o shader.o stb_image.o camera.o worldmap.o
-	g++ $(FLAGS) main.o glad.o shader.o stb_image.o camera.o worldmap.o -o main
+CXXSOURCES = main.cpp\
+	camera.cpp\
+	gameobject.cpp\
+	player.cpp\
+	shader.cpp\
+	stb_image.cpp\
+	worldmap.cpp
 
-main.o: main.cpp
-	g++ $(FLAGS) -c main.cpp
+CSOURCES = glad.c
 
-camera.o: camera.h camera.cpp
-	g++ $(FLAGS) -c camera.cpp
+HEADERS = camera.h\
+	gameobject.h\
+	player.h\
+	shader.h\
+	stb_image.h\
+	worldmap.h
 
-worldmap.o: worldmap.h worldmap.cpp
-	g++ $(FLAGS) -c worldmap.cpp
+OBJECTS = $(CXXSOURCES:.cpp=.o) $(CSOURCES:.c=.o)
 
-shader.o: shader.h shader.cpp
-	g++ $(FLAGS) -c shader.cpp
+#$(info	Objects files: $(OBJECTS))
 
-glad.o: glad.c
-	g++ $(FLAGS) -c glad.c
+all: main
 
-stb_image.o: stb_image.cpp
-	g++ $(FLAGS) -c stb_image.cpp
+main: $(OBJECTS)
+	$(CXX) $(CXXFLAGS) $^ -o $@
 
+$(CXXSOURCES:.cpp=.o): %.o: %.cpp $(HEADERS)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(CSOURCES:.c=.o): %.o: %.c $(HEADERS)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+.PHONY: clean
 clean:
-	rm main main.o shader.o glad.o stb_image.o camera.o
+	-@rm main $(OBJECTS) 2>/dev/null
 
