@@ -141,10 +141,7 @@ void processInput(GLFWwindow *window, GameObject *object) {
     }
     
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-        if (!camera.falling) {
-            camera.falling = true;
-            camera.velocity = -9.0f;
-        }
+        object->jump();
     }
 
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -207,27 +204,23 @@ int main(int argc, char *argv[]) {
     int mapSize = myWorldMap.generateVertexList();
     float *map = myWorldMap.vertexList;
 
-    Model worldMapModel(groundTexture);
+    Model worldMapModel(groundTexture, &shader);
     worldMapModel.setGeometry(map, mapSize / 5);
     worldMapModel.transferGeometry();
 
-    GameObject worldMapObject(&worldMapModel, &shader, &game);
+    GameObject worldMapObject(&worldMapModel, &game);
 
-    Model cube(wallTexture);
+    Model cube(wallTexture, &shader);
     cube.setGeometry(cubeVertices, 36);
     cube.transferGeometry();
 
-    GameObject someCube(&cube, &shader, &game);
+    GameObject someCube(&cube, &game);
+    someCube.setHeightOffset(0.5f);
     someCube.setPosition(glm::vec3(0.0f, 10.0f, 0.0f));
 
-    Model crate(containerTexture);
+    Model crate(containerTexture, &shader);
     crate.setGeometry(cubeVertices, 36);
     crate.transferGeometry();
-
-    
-
-
-    glEnable(GL_DEPTH_TEST);
 
     glm::vec3 cubePositions[] = {
         glm::vec3( 0.0f,  0.0f,  0.0f), 
@@ -241,6 +234,8 @@ int main(int argc, char *argv[]) {
         glm::vec3( 1.5f,  0.2f, -1.5f), 
         glm::vec3( 98.8f,  38.0f, 98.5f)  
     };
+
+    glEnable(GL_DEPTH_TEST);
 
     // render loop
     while (!glfwWindowShouldClose(window)) {
@@ -256,35 +251,11 @@ int main(int argc, char *argv[]) {
         glClearColor(0.0f, 0.5f, 0.5f, 1.0f); // state-setting function
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // state-using function
 
-        // activate program object
-        shader.use();
-        glUniform1i(glGetUniformLocation(shader.programID, "texture1"), 0);
-        //glUniform1i(glGetUniformLocation(shader.programID, "texture2"), 1);
-        //glUniform1i(glGetUniformLocation(shader.programID, "texture2"), 1);
-
-        //float timeValue = glfwGetTime();
-        //shader.setFloat("offsetX", sin(timeValue) / 2.0f);
-        //shader.setFloat("offsetY", cos(timeValue) / 2.0f);
-
-        float currentHeight = myWorldMap.getHeight(camera.position.x, camera.position.z);
-
-        if (camera.position.y > currentHeight + 1.8f && !camera.falling) {
-            camera.falling = true;
-            camera.velocity = 0.0f;
-        }
-
-        //camera.processGravity(deltaTime);
-        //if (camera.position.y < currentHeight + 1.8f) {
-        //    camera.falling = false;
-        //    camera.velocity = 0.0f;
-        //    camera.position.y = currentHeight + 1.8f;
-        //}
-
-        glUniformMatrix4fv(glGetUniformLocation(shader.programID, "view"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
+        shader.setMat4("view", camera.getViewMatrix());
 
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(camera.fov), 1280.0f / 720.0f, 0.1f, 300.0f);
-        glUniformMatrix4fv(glGetUniformLocation(shader.programID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        shader.setMat4("projection", projection);
         
 
         for (unsigned int i = 0; i < 10; ++i) {

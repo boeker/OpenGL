@@ -3,8 +3,9 @@
 #include "glad/glad.h"
 #include "glm/glm.hpp"
 
-Model::Model(Texture &texture) {
+Model::Model(Texture &texture, Shader *shader) {
     this->texture = texture;
+    this->shader = shader;
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -34,9 +35,15 @@ void Model::transferGeometry() {
 }
 
 void Model::draw() {
+    shader->use();
+    shader->setInt("textureSampler", 0);
     glActiveTexture(GL_TEXTURE0);
     texture.bind();
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, numOfVertices);
 }
 
+
+Shader* Model::getShader() {
+    return shader;
+}

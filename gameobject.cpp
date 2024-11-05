@@ -2,7 +2,7 @@
 
 #include "game.h"
 
-GameObject::GameObject(Model *model, Shader *shader, Game *game) {
+GameObject::GameObject(Model *model, Game *game) {
     position = glm::vec3(0.0f, 0.0f, 0.0f);
     front = glm::vec3(0.0f, 0.0f, -1.0f);
     up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -11,7 +11,7 @@ GameObject::GameObject(Model *model, Shader *shader, Game *game) {
     falling = true;
 
     this->model = model;
-    this->shader = shader;
+    heightOffset = 0.0f;
     this->game = game;
 }
 
@@ -23,9 +23,12 @@ void GameObject::setPosition(const glm::vec3 &newPosition) {
     position = newPosition;
 }
 
+void GameObject::setHeightOffset(const float &offset) {
+    heightOffset = offset;
+}
+
 void GameObject::simulateGravity(float deltaTime) {
     float currentHeight = game->worldMap->getHeight(position.x, position.z);
-    std::cout << "current height" << currentHeight << std::endl;
 
     if (position.y > currentHeight && !falling) {
         falling = true;
@@ -46,7 +49,6 @@ void GameObject::simulateGravity(float deltaTime) {
         position.y = currentHeight;
     }
 
-    std::cout << "gravity " << position.y << std::endl;
 }
 
 void GameObject::processMovement(Direction direction, float deltaTime) {
@@ -70,17 +72,22 @@ void GameObject::processMovement(Direction direction, float deltaTime) {
     }
 
     //position.y = previousHeight;
-    std::cout << "x" << position.x << std::endl;
-    std::cout << "y" << position.y << std::endl;
-    std::cout << "z" << position.z << std::endl;
+}
+
+void GameObject::jump() {
+    if (!falling) {
+        falling = true;
+        velocity = -5.0f;
+    }
 }
 
 void GameObject::draw() {
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, position);
+    model = glm::translate(model, glm::vec3(0.0f, heightOffset, 0.0f));
     //TODO
     //model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.3f, 0.5f));
-    shader->setMat4("model", model);
+    this->model->getShader()->setMat4("model", model);
 
     this->model->draw();
 }

@@ -20,16 +20,18 @@ private:
     Game *game;
 
     Model *model;
-    Shader *shader;
+    float heightOffset;
 public:
     enum class Direction {FORWARD, BACKWARD, LEFT, RIGHT};
 
-    GameObject(Model *model, Shader *shader, Game *game);
+    GameObject(Model *model, Game *game);
 
     glm::vec3 getPosition() const;
     void setPosition(const glm::vec3 &newPosition);
+    void setHeightOffset(const float &offset);
 
     void processMovement(Direction direction, float deltaTime);
+    void jump();
 
     void draw();
     void simulateGravity(float deltaTime);
