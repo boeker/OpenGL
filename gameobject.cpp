@@ -67,7 +67,6 @@ void GameObject::move(glm::vec3 direction) {
 }
 
 void GameObject::processMovement(Direction direction, float deltaTime) {
-    float previousHeight = position.y;
     const float cameraSpeed = 5.0f * deltaTime;//movementSpeed * deltaTime;
 
     if (direction == Direction::FORWARD) {

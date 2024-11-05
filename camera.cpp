@@ -52,12 +52,28 @@ void Camera::update() {
             up = player->getUp();
             position = player->getPosition() + 0.5f * front + 0.5f * up;
         } else {
-            front = player->getFront();
+            //front = player->getFront();
+            //up = player->getUp();
+            //position = player->getPosition() - distance * front + 2.0f * up;
+            //front = glm::normalize(player->getPosition() - position);
+
+            glm::vec3 direction;
+            direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+            direction.y = sin(glm::radians(pitch));
+            direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+            front = glm::normalize(direction);
+
             up = player->getUp();
             position = player->getPosition() - distance * front + 2.0f * up;
             front = glm::normalize(player->getPosition() - position);
         }
-    } 
+    } else {
+        glm::vec3 direction;
+        direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        direction.y = sin(glm::radians(pitch));
+        direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        front = glm::normalize(direction);
+    }
 }
 
 glm::mat4 Camera::getViewMatrix() const {
@@ -94,6 +110,9 @@ void Camera::processMovement(Direction direction, float deltaTime) {
 
     if (player && attached) {
         player->processMovement(direction, deltaTime);
+        //glm::vec3 playerMovement = directionVector;
+        //playerMovement.y = 0.0f;
+        //player->move(cameraSpeed * glm::normalize(playerMovement));
     }
 }
 
@@ -108,13 +127,10 @@ void Camera::processDirectionChange(float yawOffset, float pitchOffset) {
         pitch = -89.0f;
     }
 
-    glm::vec3 direction;
-    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    direction.y = sin(glm::radians(pitch));
-    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    front = glm::normalize(direction);
+    // not necessary, will be called in rendering loop
+    //update();
 
-    if (player && attached) {
+    if (player && attached && firstPerson) {
         player->processDirectionChange(yawOffset * sensitivity, 0.0f);
     }
 }
