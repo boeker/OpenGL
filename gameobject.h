@@ -27,6 +27,8 @@ public:
     GameObject(Model *model, Game *game);
 
     glm::vec3 getPosition() const;
+    glm::vec3 getFront() const;
+    glm::vec3 getUp() const;
     void setPosition(const glm::vec3 &newPosition);
     void setHeightOffset(const float &offset);
 

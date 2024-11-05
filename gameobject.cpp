@@ -19,6 +19,14 @@ glm::vec3 GameObject::getPosition() const {
     return position;
 }
 
+glm::vec3 GameObject::getFront() const {
+    return front;
+}
+
+glm::vec3 GameObject::getUp() const {
+    return up;
+}
+
 void GameObject::setPosition(const glm::vec3 &newPosition) {
     position = newPosition;
 }

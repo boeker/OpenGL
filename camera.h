@@ -4,7 +4,14 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
+#include "gameobject.h"
+
 class Camera {
+private:
+    GameObject *player;
+    bool attached;
+    bool firstPerson;
+
 public:
     glm::vec3 position = glm::vec3(0.0f, 0.0f, 3.0f);
     glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -16,16 +23,21 @@ public:
     float fov;
 
     float movementSpeed;
-    bool falling;
 
     float velocity;
 
-    enum class Direction {FORWARD, BACKWARD, LEFT, RIGHT};
+    enum class Direction {FORWARD, BACKWARD, LEFT, RIGHT, UPWARD, DOWNWARD};
     float sensitivity;
 
 
     Camera();
+    void attachToPlayer(GameObject *player);
+    void detachFromPlayer();
+    bool isAttached();
+    void attach();
+    void detach();
 
+    void update();
     glm::mat4 getViewMatrix() const;
     
     void processMovement(Direction direction, float deltaTime);

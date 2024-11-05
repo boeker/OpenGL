@@ -142,11 +142,23 @@ void processInput(GLFWwindow *window, GameObject *object) {
     
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
         object->jump();
+        camera.processMovement(Camera::Direction::UPWARD, deltaTime);
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+        camera.processMovement(Camera::Direction::DOWNWARD, deltaTime);
     }
 
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-        camera.falling = true;
         camera.velocity += -0.22f;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
+        if (camera.isAttached()) {
+            camera.detach();
+        } else {
+            camera.attach();
+        }
     }
 }
 
@@ -217,6 +229,7 @@ int main(int argc, char *argv[]) {
     GameObject someCube(&cube, &game);
     someCube.setHeightOffset(0.5f);
     someCube.setPosition(glm::vec3(0.0f, 10.0f, 0.0f));
+    camera.attachToPlayer(&someCube);
 
     Model crate(containerTexture, &shader);
     crate.setGeometry(cubeVertices, 36);
@@ -251,6 +264,7 @@ int main(int argc, char *argv[]) {
         glClearColor(0.0f, 0.5f, 0.5f, 1.0f); // state-setting function
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // state-using function
 
+        camera.update();
         shader.setMat4("view", camera.getViewMatrix());
 
         glm::mat4 projection;

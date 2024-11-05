@@ -1,6 +1,10 @@
 #include "camera.h"
 
 Camera::Camera() {
+    attached = false;
+
+    firstPerson = false;
+
     position = glm::vec3(3.0f, 3.0f, 3.0f);
     front = glm::vec3(0.0f, 0.0f, -1.0f);
     up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -10,8 +14,38 @@ Camera::Camera() {
 
     fov = 45.0f;
 
-    movementSpeed = 5.0f;
     sensitivity = 0.1f;
+}
+
+void Camera::attachToPlayer(GameObject *player) {
+    this->player = player;
+    this->attached = true;
+    firstPerson = true;
+}
+
+void Camera::detachFromPlayer() {
+    this->player = nullptr;
+    this->attached = false;
+}
+
+bool Camera::isAttached() {
+    return attached;
+}
+
+void Camera::attach() {
+    attached = true;
+}
+
+void Camera::detach() {
+    attached = false;
+}
+
+void Camera::update() {
+    if (player && attached) {
+        front = player->getFront();
+        up = player->getUp();
+        position = player->getPosition() + 0.5f * front;
+    } 
 }
 
 glm::mat4 Camera::getViewMatrix() const {
@@ -38,7 +72,14 @@ void Camera::processMovement(Direction direction, float deltaTime) {
         position += cameraSpeed * glm::normalize(glm::cross(front, up));
     }
 
-    position.y = previousHeight;
+    //position.y = previousHeight;
+    if (direction == Direction::UPWARD) {
+        position += cameraSpeed * up;
+    }
+
+    if (direction == Direction::DOWNWARD) {
+        position -= cameraSpeed * up;
+    }
 }
 
 void Camera::processDirectionChange(float yawOffset, float pitchOffset) {
