@@ -20,7 +20,7 @@ Camera::Camera() {
 void Camera::attachToPlayer(GameObject *player) {
     this->player = player;
     this->attached = true;
-    firstPerson = true;
+    //firstPerson = true;
 }
 
 void Camera::detachFromPlayer() {
@@ -42,9 +42,17 @@ void Camera::detach() {
 
 void Camera::update() {
     if (player && attached) {
-        front = player->getFront();
-        up = player->getUp();
-        position = player->getPosition() + 0.5f * front;
+
+        if (firstPerson) {
+            front = player->getFront();
+            up = player->getUp();
+            position = player->getPosition() + 0.5f * front;
+        } else {
+            front = player->getFront();
+            up = player->getUp();
+            position = player->getPosition() - 5.0f * front + 2.0f * up;
+            front = glm::normalize(player->getPosition() - position);
+        }
     } 
 }
 
@@ -80,6 +88,10 @@ void Camera::processMovement(Direction direction, float deltaTime) {
     if (direction == Direction::DOWNWARD) {
         position -= cameraSpeed * up;
     }
+
+    if (player && attached) {
+        player->processMovement(direction, deltaTime);
+    }
 }
 
 void Camera::processDirectionChange(float yawOffset, float pitchOffset) {
@@ -98,6 +110,10 @@ void Camera::processDirectionChange(float yawOffset, float pitchOffset) {
     direction.y = sin(glm::radians(pitch));
     direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     front = glm::normalize(direction);
+
+    if (player && attached) {
+        player->processDirectionChange(yawOffset * sensitivity, 0.0f);
+    }
 }
 
 void Camera::processFOVChange(float offset) {

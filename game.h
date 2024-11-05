@@ -15,8 +15,6 @@ public:
 
     Game(WorldMap *worldMap);
 
-    static constexpr float GRAVITY = 9.82f;
-
     void draw();
 };
 

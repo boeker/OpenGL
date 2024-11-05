@@ -5,6 +5,7 @@
 
 #include "shader.h"
 #include "model.h"
+#include "constants.h"
 
 class Game;
 
@@ -14,6 +15,9 @@ private:
     glm::vec3 front;
     glm::vec3 up;
 
+    float yaw;
+    float pitch;
+
     float velocity;
     bool falling;
 
@@ -22,8 +26,6 @@ private:
     Model *model;
     float heightOffset;
 public:
-    enum class Direction {FORWARD, BACKWARD, LEFT, RIGHT};
-
     GameObject(Model *model, Game *game);
 
     glm::vec3 getPosition() const;
@@ -32,6 +34,7 @@ public:
     void setPosition(const glm::vec3 &newPosition);
     void setHeightOffset(const float &offset);
 
+    void processDirectionChange(float yawOffset, float pitchOffset);
     void processMovement(Direction direction, float deltaTime);
     void jump();
 

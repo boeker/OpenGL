@@ -7,6 +7,9 @@ GameObject::GameObject(Model *model, Game *game) {
     front = glm::vec3(0.0f, 0.0f, -1.0f);
     up = glm::vec3(0.0f, 1.0f, 0.0f);
 
+    yaw = 0.0f;
+    pitch = 0.0f;
+
     velocity = 0.0f;
     falling = true;
 
@@ -44,7 +47,7 @@ void GameObject::simulateGravity(float deltaTime) {
     }
 
     if (falling) {
-        float newVelocity = velocity + Game::GRAVITY * deltaTime;
+        float newVelocity = velocity + GRAVITY * deltaTime;
         float displacement = deltaTime * (velocity + newVelocity) / 2.0f;
         position.y -= displacement;
 
@@ -82,10 +85,21 @@ void GameObject::processMovement(Direction direction, float deltaTime) {
     //position.y = previousHeight;
 }
 
+void GameObject::processDirectionChange(float yawOffset, float pitchOffset) {
+    yaw += yawOffset;
+    pitch += pitchOffset;
+
+    glm::vec3 direction;
+    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    direction.y = sin(glm::radians(pitch));
+    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front = glm::normalize(direction);
+}
+
 void GameObject::jump() {
     if (!falling) {
         falling = true;
-        velocity = -5.0f;
+        velocity = -15.0f;
     }
 }
 
@@ -93,8 +107,8 @@ void GameObject::draw() {
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, position);
     model = glm::translate(model, glm::vec3(0.0f, heightOffset, 0.0f));
-    //TODO
-    //model = glm::rotate(model, glm::radians(0.0f), glm::vec3(1.0f, 0.3f, 0.5f));
+    model = glm::rotate(model, glm::radians(yaw), glm::vec3(0.0f, -1.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
     this->model->getShader()->setMat4("model", model);
 
     this->model->draw();

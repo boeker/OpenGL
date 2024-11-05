@@ -5,6 +5,8 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 #include "gameobject.h"
+#include "game.h"
+#include "constants.h"
 
 class Camera {
 private:
@@ -26,7 +28,6 @@ public:
 
     float velocity;
 
-    enum class Direction {FORWARD, BACKWARD, LEFT, RIGHT, UPWARD, DOWNWARD};
     float sensitivity;
 
 

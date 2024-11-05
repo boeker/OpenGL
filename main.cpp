@@ -17,6 +17,8 @@
 #include "texture.h"
 #include "model.h"
 
+#include "constants.h"
+
 float cubeVertices[] = {
     -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
      0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -103,35 +105,19 @@ void processInput(GLFWwindow *window, GameObject *object) {
 
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        camera.processMovement(Camera::Direction::FORWARD, deltaTime);
+        camera.processMovement(Direction::FORWARD, deltaTime);
     }
 
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        camera.processMovement(Camera::Direction::BACKWARD, deltaTime);
+        camera.processMovement(Direction::BACKWARD, deltaTime);
     }
 
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        camera.processMovement(Camera::Direction::LEFT, deltaTime);
+        camera.processMovement(Direction::LEFT, deltaTime);
     }
 
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        camera.processMovement(Camera::Direction::RIGHT, deltaTime);
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-        object->processMovement(GameObject::Direction::FORWARD, deltaTime);
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-        object->processMovement(GameObject::Direction::BACKWARD, deltaTime);
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-        object->processMovement(GameObject::Direction::LEFT, deltaTime);
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-        object->processMovement(GameObject::Direction::RIGHT, deltaTime);
+        camera.processMovement(Direction::RIGHT, deltaTime);
     }
 
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
@@ -142,11 +128,11 @@ void processInput(GLFWwindow *window, GameObject *object) {
     
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
         object->jump();
-        camera.processMovement(Camera::Direction::UPWARD, deltaTime);
+        camera.processMovement(Direction::UPWARD, deltaTime);
     }
 
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
-        camera.processMovement(Camera::Direction::DOWNWARD, deltaTime);
+        camera.processMovement(Direction::DOWNWARD, deltaTime);
     }
 
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {

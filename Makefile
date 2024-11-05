@@ -3,6 +3,7 @@ CXX = g++
 
 CXXSOURCES = main.cpp\
 	camera.cpp\
+	constants.cpp\
 	gameobject.cpp\
 	game.cpp\
 	model.cpp\
@@ -15,6 +16,7 @@ CXXSOURCES = main.cpp\
 CSOURCES = glad.c
 
 HEADERS = camera.h\
+	constants.h\
 	gameobject.h\
 	game.h\
 	model.h\
