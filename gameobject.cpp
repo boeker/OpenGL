@@ -62,6 +62,10 @@ void GameObject::simulateGravity(float deltaTime) {
 
 }
 
+void GameObject::move(glm::vec3 direction) {
+    position += direction;
+}
+
 void GameObject::processMovement(Direction direction, float deltaTime) {
     float previousHeight = position.y;
     const float cameraSpeed = 5.0f * deltaTime;//movementSpeed * deltaTime;

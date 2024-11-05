@@ -95,7 +95,7 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
 }
 
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
-    camera.processFOVChange((float)yoffset);
+    camera.adjustDistance(-0.5f * (float)yoffset);
 }
 
 void processInput(GLFWwindow *window, GameObject *object) {
@@ -120,11 +120,7 @@ void processInput(GLFWwindow *window, GameObject *object) {
         camera.processMovement(Direction::RIGHT, deltaTime);
     }
 
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-        camera.movementSpeed = 15.0f;
-    } else {
-        camera.movementSpeed = 5.0f;
-    }
+    camera.setRunning(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS);
     
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
         object->jump();

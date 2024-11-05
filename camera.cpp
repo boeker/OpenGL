@@ -4,6 +4,7 @@ Camera::Camera() {
     attached = false;
 
     firstPerson = false;
+    distance = 5.0f;
 
     position = glm::vec3(3.0f, 3.0f, 3.0f);
     front = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -15,6 +16,9 @@ Camera::Camera() {
     fov = 45.0f;
 
     sensitivity = 0.1f;
+    movementSpeed = 5.0f;
+
+    running = false;
 }
 
 void Camera::attachToPlayer(GameObject *player) {
@@ -46,11 +50,11 @@ void Camera::update() {
         if (firstPerson) {
             front = player->getFront();
             up = player->getUp();
-            position = player->getPosition() + 0.5f * front;
+            position = player->getPosition() + 0.5f * front + 0.5f * up;
         } else {
             front = player->getFront();
             up = player->getUp();
-            position = player->getPosition() - 5.0f * front + 2.0f * up;
+            position = player->getPosition() - distance * front + 2.0f * up;
             front = glm::normalize(player->getPosition() - position);
         }
     } 
@@ -61,33 +65,32 @@ glm::mat4 Camera::getViewMatrix() const {
 }
 
 void Camera::processMovement(Direction direction, float deltaTime) {
-    float previousHeight = position.y;
-    const float cameraSpeed = movementSpeed * deltaTime;
+    const float cameraSpeed = ((running) ? (movementSpeed * 5.0f)
+                                         : movementSpeed)* deltaTime;
+    glm::vec3 directionVector;
 
-    if (direction == Direction::FORWARD) {
-        position += cameraSpeed * front;
+    switch (direction) {
+        case Direction::FORWARD:
+            directionVector = front;
+            break;
+        case Direction::BACKWARD:
+            directionVector = -front;
+            break;
+        case Direction::LEFT:
+            directionVector = -glm::normalize(glm::cross(front, up));
+            break;
+        case Direction::RIGHT:
+            directionVector = glm::normalize(glm::cross(front, up));
+            break;
+        case Direction::UPWARD:
+            directionVector = up;
+            break;
+        case Direction::DOWNWARD:
+            directionVector = -up;
+            break;
     }
 
-    if (direction == Direction::BACKWARD) {
-        position -= cameraSpeed * front;
-    }
-
-    if (direction == Direction::LEFT) {
-        position -= cameraSpeed * glm::normalize(glm::cross(front, up));
-    }
-
-    if (direction == Direction::RIGHT) {
-        position += cameraSpeed * glm::normalize(glm::cross(front, up));
-    }
-
-    //position.y = previousHeight;
-    if (direction == Direction::UPWARD) {
-        position += cameraSpeed * up;
-    }
-
-    if (direction == Direction::DOWNWARD) {
-        position -= cameraSpeed * up;
-    }
+    position += cameraSpeed * directionVector;
 
     if (player && attached) {
         player->processMovement(direction, deltaTime);
@@ -126,3 +129,22 @@ void Camera::processFOVChange(float offset) {
     }
 }
 
+void Camera::adjustDistance(float offset) {
+    distance += offset;
+    if (distance < 1.0f) {
+        distance = 1.0f;
+    }
+
+    if (!firstPerson && distance < 2.0f) {
+        firstPerson = true;
+        distance = 1.0f;
+    }
+
+    if (firstPerson && distance >= 2.0f) {
+        firstPerson = false;
+    }
+}
+
+void Camera::setRunning(bool running) {
+    this->running = running;
+}
