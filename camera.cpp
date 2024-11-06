@@ -45,29 +45,25 @@ void Camera::detach() {
 }
 
 void Camera::update() {
+    // compute new front vector
+    glm::vec3 direction;
+    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    direction.y = sin(glm::radians(pitch));
+    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front = glm::normalize(direction);
+
     if (player && attached) {
-
         if (firstPerson) {
-            front = player->getFront();
+            // first person camera
             up = player->getUp();
-            position = player->getPosition() + 0.5f * front + 0.5f * up;
-        } else {
-            glm::vec3 direction;
-            direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-            direction.y = sin(glm::radians(pitch));
-            direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-            front = glm::normalize(direction);
+            position = player->getPosition() + 1.0f * front + 2.5f * up;
 
+        } else {
+            // third person camera
             up = player->getUp();
             position = player->getPosition() - distance * front + 2.0f * up;
             front = glm::normalize(player->getPosition() - position);
         }
-    } else {
-        glm::vec3 direction;
-        direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-        direction.y = sin(glm::radians(pitch));
-        direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-        front = glm::normalize(direction);
     }
 }
 
