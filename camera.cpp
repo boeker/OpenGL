@@ -109,10 +109,15 @@ void Camera::processMovement(Direction direction, float deltaTime) {
     position += cameraSpeed * directionVector;
 
     if (player && attached) {
-        player->processMovement(direction, deltaTime);
-        //glm::vec3 playerMovement = directionVector;
-        //playerMovement.y = 0.0f;
-        //player->move(cameraSpeed * glm::normalize(playerMovement));
+        if (direction == Direction::UPWARD) {
+            player->jump();
+        } else {
+            glm::vec3 playerMovement = directionVector;
+            playerMovement.y = 0.0f;
+            if (playerMovement.x != 0.0f || playerMovement.z != 0.0f) {
+                player->move(cameraSpeed * glm::normalize(playerMovement));
+            }
+        }
     }
 }
 
@@ -126,9 +131,6 @@ void Camera::processDirectionChange(float yawOffset, float pitchOffset) {
     if (pitch < -89.0f) {
         pitch = -89.0f;
     }
-
-    // not necessary, will be called in rendering loop
-    //update();
 
     if (player && attached && firstPerson) {
         player->processDirectionChange(yawOffset * sensitivity, 0.0f);

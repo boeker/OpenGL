@@ -102,7 +102,7 @@ void GameObject::processDirectionChange(float yawOffset, float pitchOffset) {
 void GameObject::jump() {
     if (!falling) {
         falling = true;
-        velocity = -15.0f;
+        velocity = -30.0f;
     }
 }
 

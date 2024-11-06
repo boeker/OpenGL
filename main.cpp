@@ -123,7 +123,6 @@ void processInput(GLFWwindow *window, GameObject *object) {
     camera.setRunning(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS);
     
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-        object->jump();
         camera.processMovement(Direction::UPWARD, deltaTime);
     }
 
@@ -227,7 +226,7 @@ int main(int argc, char *argv[]) {
         glm::vec3( 1.3f, -2.0f, -2.5f),  
         glm::vec3( 1.5f,  2.0f, -2.5f), 
         glm::vec3( 1.5f,  0.2f, -1.5f), 
-        glm::vec3( 98.8f,  38.0f, 98.5f)  
+        glm::vec3(-2.8f,  3.0f,  7.5f)  
     };
 
     glEnable(GL_DEPTH_TEST);
@@ -257,6 +256,7 @@ int main(int argc, char *argv[]) {
         for (unsigned int i = 0; i < 10; ++i) {
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
+            model = glm::translate(model, glm::vec3(102.0f, 41.0f, 102.0f));
             float angle = 20.0f * i + 50.0f * (float)glfwGetTime();
             model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
             shader.setMat4("model", model);
