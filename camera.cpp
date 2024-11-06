@@ -107,6 +107,7 @@ void Camera::processMovement(Direction direction, float deltaTime) {
             playerMovement.y = 0.0f;
             if (playerMovement.x != 0.0f || playerMovement.z != 0.0f) {
                 player->move(cameraSpeed * glm::normalize(playerMovement));
+                player->setDirection(yaw, 0.0f);
             }
         }
     }
@@ -147,6 +148,7 @@ void Camera::adjustDistance(float offset) {
     if (!firstPerson && distance < 2.0f) {
         firstPerson = true;
         distance = 1.0f;
+        player->setDirection(yaw, 0.0f);
     }
 
     if (firstPerson && distance >= 2.0f) {

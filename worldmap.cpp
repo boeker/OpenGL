@@ -41,7 +41,7 @@ void WorldMap::generateMap() {
 
             int heightOffset = (rand() % 100) - 50;
             float heightOffsetFloat = (float)heightOffset / 100.0f;
-            if (y < 100 && x < 100) {
+            if (y < SIZE / 2 && x < SIZE / 2) {
                 heightOffsetFloat += 0.2f;
             } else {
                 heightOffsetFloat -= 0.2f;

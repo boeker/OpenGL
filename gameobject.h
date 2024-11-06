@@ -35,6 +35,7 @@ public:
     void setHeightOffset(const float &offset);
 
     void processDirectionChange(float yawOffset, float pitchOffset);
+    void setDirection(float yaw, float pitch);
     
     void move(glm::vec3 direction);
     void jump();

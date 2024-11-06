@@ -77,6 +77,11 @@ void GameObject::processDirectionChange(float yawOffset, float pitchOffset) {
     front = glm::normalize(direction);
 }
 
+void GameObject::setDirection(float yaw, float pitch) {
+    this->yaw = yaw;
+    this->pitch = pitch;
+}
+
 void GameObject::jump() {
     if (!falling) {
         falling = true;
