@@ -66,28 +66,6 @@ void GameObject::move(glm::vec3 direction) {
     position += direction;
 }
 
-void GameObject::processMovement(Direction direction, float deltaTime) {
-    const float cameraSpeed = 5.0f * deltaTime;//movementSpeed * deltaTime;
-
-    if (direction == Direction::FORWARD) {
-        position += cameraSpeed * front;
-    }
-
-    if (direction == Direction::BACKWARD) {
-        position -= cameraSpeed * front;
-    }
-
-    if (direction == Direction::LEFT) {
-        position -= cameraSpeed * glm::normalize(glm::cross(front, up));
-    }
-
-    if (direction == Direction::RIGHT) {
-        position += cameraSpeed * glm::normalize(glm::cross(front, up));
-    }
-
-    //position.y = previousHeight;
-}
-
 void GameObject::processDirectionChange(float yawOffset, float pitchOffset) {
     yaw += yawOffset;
     pitch += pitchOffset;
@@ -102,7 +80,7 @@ void GameObject::processDirectionChange(float yawOffset, float pitchOffset) {
 void GameObject::jump() {
     if (!falling) {
         falling = true;
-        velocity = -30.0f;
+        velocity = -8.0f;
     }
 }
 

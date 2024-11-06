@@ -37,7 +37,6 @@ public:
     void processDirectionChange(float yawOffset, float pitchOffset);
     
     void move(glm::vec3 direction);
-    void processMovement(Direction direction, float deltaTime);
     void jump();
 
     void draw();

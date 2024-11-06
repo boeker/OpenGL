@@ -52,11 +52,6 @@ void Camera::update() {
             up = player->getUp();
             position = player->getPosition() + 0.5f * front + 0.5f * up;
         } else {
-            //front = player->getFront();
-            //up = player->getUp();
-            //position = player->getPosition() - distance * front + 2.0f * up;
-            //front = glm::normalize(player->getPosition() - position);
-
             glm::vec3 direction;
             direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
             direction.y = sin(glm::radians(pitch));
