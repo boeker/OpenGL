@@ -99,3 +99,14 @@ void GameObject::draw() {
 
     this->model->draw();
 }
+
+void GameObject::draw(Shader &shader) {
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, position);
+    model = glm::translate(model, glm::vec3(0.0f, heightOffset, 0.0f));
+    model = glm::rotate(model, glm::radians(yaw), glm::vec3(0.0f, -1.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
+    shader.setMat4("model", model);
+
+    this->model->draw(shader);
+}

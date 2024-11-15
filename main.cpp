@@ -207,18 +207,19 @@ int main(int argc, char *argv[]) {
     cube.setGeometry(cubeVertices, 36);
     cube.transferGeometry();
 
-    GameObject someCube(&cube, &game);
-    someCube.setHeightOffset(0.5f);
-    someCube.setPosition(glm::vec3(0.0f, 10.0f, 0.0f));
-    camera.attachToPlayer(&someCube);
+    // wip
+    Model backpack(containerTexture, &shader);
+    backpack.loadModel("models/backpack/backpack.obj");
+
+    // player
+    GameObject playerObject(&backpack, &game);
+    playerObject.setHeightOffset(0.5f);
+    playerObject.setPosition(glm::vec3(0.0f, 10.0f, 0.0f));
+    camera.attachToPlayer(&playerObject);
 
     Model crate(containerTexture, &shader);
     crate.setGeometry(cubeVertices, 36);
     crate.transferGeometry();
-
-    // wip
-    Model testModel(containerTexture, &shader);
-    testModel.loadModel("models/backpack/backpack.obj");
 
     glm::vec3 cubePositions[] = {
         glm::vec3( 0.0f,  0.0f,  0.0f), 
@@ -242,8 +243,8 @@ int main(int argc, char *argv[]) {
         lastFrame = currentFrame;
 
         // process input
-        processInput(window, &someCube);
-        someCube.simulateGravity(deltaTime);
+        processInput(window, &playerObject);
+        playerObject.simulateGravity(deltaTime);
 
         // rendering
         glClearColor(0.0f, 0.5f, 0.5f, 1.0f); // state-setting function
@@ -268,10 +269,9 @@ int main(int argc, char *argv[]) {
             crate.draw();
         }
         
-        someCube.draw();
+        playerObject.draw(shader);
 
         worldMapObject.draw();
-
 
         // swap buffers
         glfwSwapBuffers(window);

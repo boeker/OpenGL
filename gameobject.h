@@ -25,6 +25,7 @@ private:
 
     Model *model;
     float heightOffset;
+
 public:
     GameObject(Model *model, Game *game);
 
@@ -41,6 +42,7 @@ public:
     void jump();
 
     void draw();
+    void draw(Shader &shader);
     void simulateGravity(float deltaTime);
 };
 
