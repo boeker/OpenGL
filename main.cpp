@@ -216,6 +216,10 @@ int main(int argc, char *argv[]) {
     crate.setGeometry(cubeVertices, 36);
     crate.transferGeometry();
 
+    // wip
+    Model testModel(containerTexture, &shader);
+    testModel.loadModel("models/backpack/backpack.obj");
+
     glm::vec3 cubePositions[] = {
         glm::vec3( 0.0f,  0.0f,  0.0f), 
         glm::vec3( 2.0f,  5.0f, -15.0f), 

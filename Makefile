@@ -1,4 +1,4 @@
-CXXFLAGS = -g -Wall -lglfw
+CXXFLAGS = -g -Wall -lglfw -lassimp
 CXX = g++
 
 CXXSOURCES = main.cpp\
@@ -6,6 +6,7 @@ CXXSOURCES = main.cpp\
 	constants.cpp\
 	gameobject.cpp\
 	game.cpp\
+	mesh.cpp\
 	model.cpp\
 	player.cpp\
 	shader.cpp\
@@ -19,6 +20,7 @@ HEADERS = camera.h\
 	constants.h\
 	gameobject.h\
 	game.h\
+	mesh.h\
 	model.h\
 	player.h\
 	shader.h\
