@@ -214,7 +214,9 @@ int main(int argc, char *argv[]) {
     // player
     GameObject playerObject(&backpack, &game);
     playerObject.setHeightOffset(0.5f);
+    playerObject.setYawOffset(90.0f);
     playerObject.setPosition(glm::vec3(0.0f, 10.0f, 0.0f));
+    playerObject.setDirection(45.0f, 0.0f);
     camera.attachToPlayer(&playerObject);
 
     Model crate(containerTexture, &shader);

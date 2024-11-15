@@ -25,6 +25,7 @@ private:
 
     Model *model;
     float heightOffset;
+    float yawOffset;
 
 public:
     GameObject(Model *model, Game *game);
@@ -33,10 +34,14 @@ public:
     glm::vec3 getFront() const;
     glm::vec3 getUp() const;
     void setPosition(const glm::vec3 &newPosition);
-    void setHeightOffset(const float &offset);
+    void setHeightOffset(const float offset);
+    void setYawOffset(const float offset);
 
     void processDirectionChange(float yawOffset, float pitchOffset);
+    void updateFront();
     void setDirection(float yaw, float pitch);
+    float getYaw();
+    float getPitch();
     
     void move(glm::vec3 direction);
     void jump();

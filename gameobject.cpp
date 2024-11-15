@@ -15,6 +15,7 @@ GameObject::GameObject(Model *model, Game *game) {
 
     this->model = model;
     heightOffset = 0.0f;
+    yawOffset = 0.0f;
     this->game = game;
 }
 
@@ -34,8 +35,12 @@ void GameObject::setPosition(const glm::vec3 &newPosition) {
     position = newPosition;
 }
 
-void GameObject::setHeightOffset(const float &offset) {
+void GameObject::setHeightOffset(const float offset) {
     heightOffset = offset;
+}
+
+void GameObject::setYawOffset(const float offset) {
+    yawOffset = offset;
 }
 
 void GameObject::simulateGravity(float deltaTime) {
@@ -70,6 +75,10 @@ void GameObject::processDirectionChange(float yawOffset, float pitchOffset) {
     yaw += yawOffset;
     pitch += pitchOffset;
 
+    updateFront();
+}
+
+void GameObject::updateFront() {
     glm::vec3 direction;
     direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
     direction.y = sin(glm::radians(pitch));
@@ -80,6 +89,16 @@ void GameObject::processDirectionChange(float yawOffset, float pitchOffset) {
 void GameObject::setDirection(float yaw, float pitch) {
     this->yaw = yaw;
     this->pitch = pitch;
+
+    updateFront();
+}
+
+float GameObject::getYaw() {
+    return yaw;
+}
+
+float GameObject::getPitch() {
+    return pitch;
 }
 
 void GameObject::jump() {
@@ -93,7 +112,7 @@ void GameObject::draw() {
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, position);
     model = glm::translate(model, glm::vec3(0.0f, heightOffset, 0.0f));
-    model = glm::rotate(model, glm::radians(yaw), glm::vec3(0.0f, -1.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(yaw + yawOffset), glm::vec3(0.0f, -1.0f, 0.0f));
     model = glm::rotate(model, glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
     this->model->getShader()->setMat4("model", model);
 
@@ -104,7 +123,7 @@ void GameObject::draw(Shader &shader) {
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, position);
     model = glm::translate(model, glm::vec3(0.0f, heightOffset, 0.0f));
-    model = glm::rotate(model, glm::radians(yaw), glm::vec3(0.0f, -1.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(yaw + yawOffset), glm::vec3(0.0f, -1.0f, 0.0f));
     model = glm::rotate(model, glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
     shader.setMat4("model", model);
 

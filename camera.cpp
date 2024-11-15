@@ -11,7 +11,7 @@ Camera::Camera() {
     up = glm::vec3(0.0f, 1.0f, 0.0f);
 
     pitch = 0.0f;
-    yaw = -90.0f;
+    yaw = 90.0f;
 
     fov = 45.0f;
 
@@ -25,6 +25,9 @@ void Camera::attachToPlayer(GameObject *player) {
     this->player = player;
     this->attached = true;
     //firstPerson = true;
+
+    yaw = player->getYaw();
+    pitch = player->getPitch();
 }
 
 void Camera::detachFromPlayer() {
@@ -56,7 +59,7 @@ void Camera::update() {
         if (firstPerson) {
             // first person camera
             up = player->getUp();
-            position = player->getPosition() + 1.0f * front + 2.5f * up;
+            position = player->getPosition() + 1.5f * front + 3.0f * up;
 
         } else {
             // third person camera
