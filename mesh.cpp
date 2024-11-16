@@ -66,6 +66,7 @@ void Mesh::draw(Shader &shader) {
         }
 
         shader.setInt(("material." + textureType + textureNumber).c_str(), i);
+
         // bind texture to active texture unit
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
@@ -103,7 +104,7 @@ Mesh Mesh::fromAssimpMesh(aiMesh *mesh, const aiScene *scene, std::string &direc
         
         vertices.push_back(vertex);
     }
-    std::cout << "INFO::MESH Processed " << vertices.size() << " vertices" << std::endl;
+    //std::cout << "INFO::MESH " << vertices.size() << " vertices" << std::endl;
 
     // process indices
     for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
@@ -112,7 +113,7 @@ Mesh Mesh::fromAssimpMesh(aiMesh *mesh, const aiScene *scene, std::string &direc
            indices.push_back(face.mIndices[j]); 
         }
     }
-    std::cout << "INFO::MESH " << indices.size() << " indices" << std::endl;
+    //std::cout << "INFO::MESH " << indices.size() << " indices" << std::endl;
 
     // process material
     if (mesh->mMaterialIndex >= 0) {
@@ -129,7 +130,7 @@ Mesh Mesh::fromAssimpMesh(aiMesh *mesh, const aiScene *scene, std::string &direc
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
     }
 
-    std::cout << "INFO::MESH Loaded " << textures.size() << " textures" << std::endl;
+    //std::cout << "INFO::MESH " << textures.size() << " textures" << std::endl;
 
     return Mesh(vertices, indices, textures);
 }
@@ -144,10 +145,8 @@ std::vector<TextureStruct> Mesh::loadMaterialTextures(aiMaterial *material,
         material->GetTexture(type, i, &path);
         bool alreadyLoaded = false;
         for (unsigned int j = 0; j < loadedTextures.size(); ++j) {
-            std::cout << "INFO::MESH Comparing " << loadedTextures[j].pathOfFile.data() << " and " << path.C_Str() <<  std::endl;
             if (std::strcmp(loadedTextures[j].pathOfFile.data(), path.C_Str()) == 0) {
                 alreadyLoaded = true;
-                std::cout << "INFO::MESH Texture already loaded." << std::endl;
 
                 textures.push_back(loadedTextures[j]);
                 break;

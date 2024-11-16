@@ -19,6 +19,28 @@
 
 #include "constants.h"
 
+GLenum glCheckError_(const char *file, int line)
+{
+    GLenum errorCode;
+    while ((errorCode = glGetError()) != GL_NO_ERROR)
+    {
+        std::string error;
+        switch (errorCode)
+        {
+            case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
+            case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; break;
+            case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
+            //case GL_STACK_OVERFLOW:                error = "STACK_OVERFLOW"; break;
+            //case GL_STACK_UNDERFLOW:               error = "STACK_UNDERFLOW"; break;
+            case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
+            case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
+        }
+        std::cout << error << " | " << file << " (" << line << ")" << std::endl;
+    }
+    return errorCode;
+}
+#define glCheckError() glCheckError_(__FILE__, __LINE__) 
+
 float cubeVertices[] = {
     -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
      0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -144,6 +166,8 @@ void processInput(GLFWwindow *window, GameObject *object) {
 }
 
 int main(int argc, char *argv[]) {
+    stbi_set_flip_vertically_on_load(true);
+
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -176,6 +200,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Maximum number of vertex attributes supported: " << nrAttributes << std::endl;
 
     Shader shader("shaders/shader.vs", "shaders/shader.fs");
+    Shader modelShader("shaders/model.vs", "shaders/model.fs");
 
 
     Texture wallTexture;
@@ -208,12 +233,13 @@ int main(int argc, char *argv[]) {
     cube.transferGeometry();
 
     // wip
-    Model backpack(containerTexture, &shader);
+    modelShader.use();
+    Model backpack(containerTexture, &modelShader);
     backpack.loadModel("models/backpack/backpack.obj");
 
     // player
     GameObject playerObject(&backpack, &game);
-    playerObject.setHeightOffset(0.5f);
+    playerObject.setHeightOffset(1.7f);
     playerObject.setYawOffset(90.0f);
     playerObject.setPosition(glm::vec3(0.0f, 10.0f, 0.0f));
     playerObject.setDirection(45.0f, 0.0f);
@@ -237,6 +263,7 @@ int main(int argc, char *argv[]) {
     };
 
     glEnable(GL_DEPTH_TEST);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // render loop
     while (!glfwWindowShouldClose(window)) {
@@ -251,6 +278,8 @@ int main(int argc, char *argv[]) {
         // rendering
         glClearColor(0.0f, 0.5f, 0.5f, 1.0f); // state-setting function
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // state-using function
+
+        shader.use();
 
         camera.update();
         shader.setMat4("view", camera.getViewMatrix());
@@ -270,10 +299,18 @@ int main(int argc, char *argv[]) {
 
             crate.draw();
         }
-        
-        playerObject.draw(shader);
 
         worldMapObject.draw();
+
+        
+        glCheckError();
+        modelShader.use();
+        modelShader.setMat4("view", camera.getViewMatrix());
+        modelShader.setMat4("projection", projection);
+        modelShader.setInt("textureSampler", 0);
+
+        playerObject.draw(modelShader);
+        glCheckError();
 
         // swap buffers
         glfwSwapBuffers(window);
