@@ -8,7 +8,6 @@ CXXSOURCES = main.cpp\
 	game.cpp\
 	mesh.cpp\
 	model.cpp\
-	player.cpp\
 	shader.cpp\
 	stb_image.cpp\
 	texture.cpp\
@@ -22,7 +21,6 @@ HEADERS = camera.h\
 	game.h\
 	mesh.h\
 	model.h\
-	player.h\
 	shader.h\
 	stb_image.h\
 	texture.h\

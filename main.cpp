@@ -16,6 +16,7 @@
 
 #include "texture.h"
 #include "model.h"
+#include "mesh.h"
 
 #include "constants.h"
 
@@ -84,6 +85,67 @@ float cubeVertices[] = {
     -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
     -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 };
+
+Mesh generateCubeMesh() {
+    float cubeVerticesNew[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+    };
+
+    std::vector<VertexStruct> vertices;
+    std::vector<unsigned int> indices;
+    VertexStruct *asVertices = (VertexStruct*)cubeVerticesNew;
+    for (int i = 0; i < 36; ++i) {
+        vertices.push_back(asVertices[i]);
+        indices.push_back(i);
+    }
+
+
+    std::vector<TextureStruct> textures;
+    TextureStruct cont = Mesh::createTextureFromFile("textures/container.jpg", "texture_diffuse");
+    textures.push_back(cont);
+
+    return Mesh(vertices, indices, textures);
+}
 
 float mixFactor = 0.5f;
 
@@ -209,6 +271,7 @@ int main(int argc, char *argv[]) {
     Texture containerTexture;
     containerTexture.loadFromFile("textures/container.jpg");
 
+
     Texture groundTexture;
     groundTexture.loadFromFile("textures/moon2.jpg");
 
@@ -217,7 +280,6 @@ int main(int argc, char *argv[]) {
     WorldMap myWorldMap;
     myWorldMap.generateMap();
     Game game(&myWorldMap);
-    
 
     int mapSize = myWorldMap.generateVertexList();
     float *map = myWorldMap.vertexList;
@@ -228,14 +290,15 @@ int main(int argc, char *argv[]) {
 
     GameObject worldMapObject(&worldMapModel, &game);
 
-    Model cube(wallTexture, &shader);
-    cube.setGeometry(cubeVertices, 36);
-    cube.transferGeometry();
-
     // wip
     modelShader.use();
     Model backpack(containerTexture, &modelShader);
     backpack.loadModel("models/backpack/backpack.obj");
+
+    TextureStruct wall = Mesh::createTextureFromFile("textures/wall.jpg", "texture_diffuse");
+    TextureStruct moon = Mesh::createTextureFromFile("textures/moon2.jpg", "texture_diffuse");
+
+    Model crateModel(generateCubeMesh());
 
     // player
     GameObject playerObject(&backpack, &game);
@@ -244,10 +307,6 @@ int main(int argc, char *argv[]) {
     playerObject.setPosition(glm::vec3(0.0f, 10.0f, 0.0f));
     playerObject.setDirection(45.0f, 0.0f);
     camera.attachToPlayer(&playerObject);
-
-    Model crate(containerTexture, &shader);
-    crate.setGeometry(cubeVertices, 36);
-    crate.transferGeometry();
 
     glm::vec3 cubePositions[] = {
         glm::vec3( 0.0f,  0.0f,  0.0f), 
@@ -288,26 +347,27 @@ int main(int argc, char *argv[]) {
         projection = glm::perspective(glm::radians(camera.fov), 1280.0f / 720.0f, 0.1f, 300.0f);
         shader.setMat4("projection", projection);
         
-
-        for (unsigned int i = 0; i < 10; ++i) {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            model = glm::translate(model, glm::vec3(102.0f, 41.0f, 102.0f));
-            float angle = 20.0f * i + 50.0f * (float)glfwGetTime();
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            shader.setMat4("model", model);
-
-            crate.draw();
-        }
-
         worldMapObject.draw();
 
         
         glCheckError();
         modelShader.use();
+
         modelShader.setMat4("view", camera.getViewMatrix());
         modelShader.setMat4("projection", projection);
         modelShader.setInt("textureSampler", 0);
+
+        for (unsigned int i = 0; i < 10; ++i) {
+            glm::mat4 modelMatrix = glm::mat4(1.0f);
+            modelMatrix = glm::translate(modelMatrix, cubePositions[i]);
+            modelMatrix = glm::translate(modelMatrix, glm::vec3(102.0f, 41.0f, 102.0f));
+            float angle = 20.0f * i + 50.0f * (float)glfwGetTime();
+            modelMatrix = glm::rotate(modelMatrix, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            modelShader.setMat4("model", modelMatrix);
+
+            crateModel.draw(modelShader);
+
+        }
 
         playerObject.draw(modelShader);
         glCheckError();

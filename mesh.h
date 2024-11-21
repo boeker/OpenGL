@@ -45,7 +45,8 @@ public:
                                                            aiTextureType type,
                                                            std::string typeName,
                                                            std::string &directory); 
-    static unsigned int createTextureFromFile(const char *path, const std::string &directory);
+    static unsigned int createTextureIDFromFile(const std::string &path);
+    static TextureStruct createTextureFromFile(const std::string &path, const std::string &type);
 };
 
 #endif

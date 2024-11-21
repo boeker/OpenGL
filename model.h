@@ -35,6 +35,7 @@ public:
     Shader* getShader();
 
     // new
+    Model(const Mesh &mesh);
     void loadModel(const std::string &path);
     void draw(Shader &shader);
 };

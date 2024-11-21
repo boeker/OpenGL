@@ -141,11 +141,13 @@ std::vector<TextureStruct> Mesh::loadMaterialTextures(aiMaterial *material,
                                                       std::string &directory) {
     std::vector<TextureStruct> textures;
     for (unsigned int i = 0; i < material->GetTextureCount(type); ++i) {
-        aiString path;
-        material->GetTexture(type, i, &path);
+        aiString filename;
+        material->GetTexture(type, i, &filename);
+        std::string path = directory + '/' + std::string(filename.C_Str()); 
+
         bool alreadyLoaded = false;
         for (unsigned int j = 0; j < loadedTextures.size(); ++j) {
-            if (std::strcmp(loadedTextures[j].pathOfFile.data(), path.C_Str()) == 0) {
+            if (std::strcmp(loadedTextures[j].pathOfFile.data(), path.data()) == 0) {
                 alreadyLoaded = true;
 
                 textures.push_back(loadedTextures[j]);
@@ -154,10 +156,7 @@ std::vector<TextureStruct> Mesh::loadMaterialTextures(aiMaterial *material,
         }
 
         if (!alreadyLoaded) {
-            TextureStruct texture;
-            texture.id = createTextureFromFile(path.C_Str(), directory);
-            texture.type = typeName;
-            texture.pathOfFile = path.C_Str();
+            TextureStruct texture = createTextureFromFile(path, typeName);
 
             textures.push_back(texture);
             loadedTextures.push_back(texture);
@@ -167,9 +166,8 @@ std::vector<TextureStruct> Mesh::loadMaterialTextures(aiMaterial *material,
     return textures;
 }
 
-unsigned int Mesh::createTextureFromFile(const char *path, const std::string &directory) {
-    std::string filename(path);
-    filename = directory + '/' + filename;
+unsigned int Mesh::createTextureIDFromFile(const std::string &path) {
+    std::cout << "INFO::MESH Loading texture " << path << std::endl;
 
     unsigned int textureID;
     glGenTextures(1, &textureID);
@@ -184,7 +182,7 @@ unsigned int Mesh::createTextureFromFile(const char *path, const std::string &di
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     int width, height, numberOfChannels;
-    unsigned char *data = stbi_load(filename.c_str(), &width, &height, &numberOfChannels, 0);
+    unsigned char *data = stbi_load(path.c_str(), &width, &height, &numberOfChannels, 0);
     
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -196,4 +194,13 @@ unsigned int Mesh::createTextureFromFile(const char *path, const std::string &di
     stbi_image_free(data);
 
     return textureID;
+}
+
+TextureStruct Mesh::createTextureFromFile(const std::string &path, const std::string &type) {
+    TextureStruct texture;
+    texture.id = createTextureIDFromFile(path);
+    texture.type = type;
+    texture.pathOfFile = path;
+
+    return texture;
 }

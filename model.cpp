@@ -76,6 +76,10 @@ Shader* Model::getShader() {
     return shader;
 }
 
+Model::Model(const Mesh &mesh) {
+    meshes.push_back(mesh);
+}
+
 void Model::loadModel(const std::string &path) {
     Assimp::Importer import;
     const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
