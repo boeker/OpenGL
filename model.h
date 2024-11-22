@@ -8,33 +8,13 @@
 
 class Model {
 private:
-    // old
-    unsigned int VAO; // vertex attribute object
-    unsigned int VBO; // vertex buffer object
-
-    float *vertices;
-    unsigned int numOfVertices;
-    Texture texture;
-
-    Shader *shader;
-
-    // new
     std::string directory;
     std::vector<Mesh> meshes;
 
     void processScene(const aiScene *scene, std::string &directory);
 
 public:
-    // old
-    Model(Texture &texture, Shader *shader);
-    
-    void setGeometry(float *vertices, unsigned int size);
-    void transferGeometry();
-    void draw();
-    
-    Shader* getShader();
-
-    // new
+    Model();
     Model(const Mesh &mesh);
     void loadModel(const std::string &path);
     void draw(Shader &shader);

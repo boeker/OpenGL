@@ -46,7 +46,6 @@ public:
     void move(glm::vec3 direction);
     void jump();
 
-    void draw();
     void draw(Shader &shader);
     void simulateGravity(float deltaTime);
 };

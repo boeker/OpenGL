@@ -261,41 +261,20 @@ int main(int argc, char *argv[]) {
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
     std::cout << "Maximum number of vertex attributes supported: " << nrAttributes << std::endl;
 
-    Shader shader("shaders/shader.vs", "shaders/shader.fs");
+    //Shader shader("shaders/shader.vs", "shaders/shader.fs");
     Shader modelShader("shaders/model.vs", "shaders/model.fs");
 
-
-    Texture wallTexture;
-    wallTexture.loadFromFile("textures/wall.jpg");
-
-    Texture containerTexture;
-    containerTexture.loadFromFile("textures/container.jpg");
-
-
-    Texture groundTexture;
-    groundTexture.loadFromFile("textures/moon2.jpg");
-
-    // generate height map and create model
-
+    // generate height map and create model from it
     WorldMap myWorldMap;
     myWorldMap.generateMap();
     Game game(&myWorldMap);
 
-    int mapSize = myWorldMap.generateVertexList();
-    float *map = myWorldMap.vertexList;
-
-    Model worldMapModel(groundTexture, &shader);
-    worldMapModel.setGeometry(map, mapSize / 5);
-    worldMapModel.transferGeometry();
-
     Model mapModel(myWorldMap.generateMesh());
     GameObject mapObject(&mapModel, &game);
 
-    GameObject worldMapObject(&worldMapModel, &game);
-
-    // wip
+    // Load backpack model and use it as player object
     modelShader.use();
-    Model backpack(containerTexture, &modelShader);
+    Model backpack;
     backpack.loadModel("models/backpack/backpack.obj");
 
     TextureStruct wall = Mesh::createTextureFromFile("textures/wall.jpg", "texture_diffuse");
@@ -340,26 +319,23 @@ int main(int argc, char *argv[]) {
         glClearColor(0.0f, 0.5f, 0.5f, 1.0f); // state-setting function
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // state-using function
 
-        shader.use();
-
-        camera.update();
-        shader.setMat4("view", camera.getViewMatrix());
-
-        glm::mat4 projection;
-        projection = glm::perspective(glm::radians(camera.fov), 1280.0f / 720.0f, 0.1f, 300.0f);
-        shader.setMat4("projection", projection);
-        
-        //worldMapObject.draw();
-
-        
         glCheckError();
         modelShader.use();
 
+        camera.update();
         modelShader.setMat4("view", camera.getViewMatrix());
-        modelShader.setMat4("projection", projection);
-        modelShader.setInt("textureSampler", 0);
 
+        glCheckError();
+
+        glm::mat4 projection;
+        projection = glm::perspective(glm::radians(camera.fov), 1280.0f / 720.0f, 0.1f, 300.0f);
+        modelShader.setMat4("projection", projection);
+
+        glCheckError();
+        
         mapObject.draw(modelShader);
+
+        glCheckError();
 
         for (unsigned int i = 0; i < 10; ++i) {
             glm::mat4 modelMatrix = glm::mat4(1.0f);
@@ -367,6 +343,7 @@ int main(int argc, char *argv[]) {
             modelMatrix = glm::translate(modelMatrix, glm::vec3(102.0f, 41.0f, 102.0f));
             float angle = 20.0f * i + 50.0f * (float)glfwGetTime();
             modelMatrix = glm::rotate(modelMatrix, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+
             modelShader.setMat4("model", modelMatrix);
 
             crateModel.draw(modelShader);
@@ -374,6 +351,7 @@ int main(int argc, char *argv[]) {
         }
 
         playerObject.draw(modelShader);
+
         glCheckError();
 
         // swap buffers

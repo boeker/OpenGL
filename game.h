@@ -14,8 +14,6 @@ public:
     WorldMap *worldMap;
 
     Game(WorldMap *worldMap);
-
-    void draw();
 };
 
 #endif
