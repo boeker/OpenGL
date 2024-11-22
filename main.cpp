@@ -288,6 +288,9 @@ int main(int argc, char *argv[]) {
     worldMapModel.setGeometry(map, mapSize / 5);
     worldMapModel.transferGeometry();
 
+    Model mapModel(myWorldMap.generateMesh());
+    GameObject mapObject(&mapModel, &game);
+
     GameObject worldMapObject(&worldMapModel, &game);
 
     // wip
@@ -296,7 +299,6 @@ int main(int argc, char *argv[]) {
     backpack.loadModel("models/backpack/backpack.obj");
 
     TextureStruct wall = Mesh::createTextureFromFile("textures/wall.jpg", "texture_diffuse");
-    TextureStruct moon = Mesh::createTextureFromFile("textures/moon2.jpg", "texture_diffuse");
 
     Model crateModel(generateCubeMesh());
 
@@ -347,7 +349,7 @@ int main(int argc, char *argv[]) {
         projection = glm::perspective(glm::radians(camera.fov), 1280.0f / 720.0f, 0.1f, 300.0f);
         shader.setMat4("projection", projection);
         
-        worldMapObject.draw();
+        //worldMapObject.draw();
 
         
         glCheckError();
@@ -356,6 +358,8 @@ int main(int argc, char *argv[]) {
         modelShader.setMat4("view", camera.getViewMatrix());
         modelShader.setMat4("projection", projection);
         modelShader.setInt("textureSampler", 0);
+
+        mapObject.draw(modelShader);
 
         for (unsigned int i = 0; i < 10; ++i) {
             glm::mat4 modelMatrix = glm::mat4(1.0f);

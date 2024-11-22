@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+#include "mesh.h"
+
 #include "glm/glm.hpp"
 
 class WorldMap {
@@ -16,6 +18,7 @@ public:
     ~WorldMap();
 
     void generateMap();
+    Mesh generateMesh();
     int generateVertexList();
     float getHeight(float x, float y);
 };

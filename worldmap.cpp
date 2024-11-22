@@ -52,6 +52,63 @@ void WorldMap::generateMap() {
     }
 }
 
+Mesh WorldMap::generateMesh() {
+    std::vector<TextureStruct> textures;
+    TextureStruct texture = Mesh::createTextureFromFile("textures/moon2.jpg", "texture_diffuse");
+    textures.push_back(texture);
+
+    std::vector<VertexStruct> vertices;
+    std::vector<unsigned int> indices;
+
+    for (int x = 1; x < SIZE; ++x) {
+        for (int y = 1; y < SIZE; ++y) {
+            // current square
+            glm::vec3 ll = glm::vec3((float) (x - 1), heightMap[x - 1][y - 1], (float) (y - 1));
+            glm::vec3 lr = glm::vec3((float) x, heightMap[x][y - 1], (float) (y - 1));
+            glm::vec3 ul = glm::vec3((float) (x - 1), heightMap[x - 1][y], (float) y);
+            glm::vec3 ur = glm::vec3((float) x, heightMap[x][y], (float) y);
+
+            // generate two triangles for the current square
+            VertexStruct vertex;
+
+            // first triangle
+            vertex.position = ll;
+            vertex.normal = glm::vec3(0.0f, 0.0f, 0.0f);
+            vertex.textureCoordinates = glm::vec2(0.0f, 0.0f);
+            indices.push_back(vertices.size());
+            vertices.push_back(vertex);
+
+            vertex.position = ul;
+            vertex.textureCoordinates = glm::vec2(0.0f, 1.0f);
+            indices.push_back(vertices.size());
+            vertices.push_back(vertex);
+
+            vertex.position = lr;
+            vertex.textureCoordinates = glm::vec2(1.0f, 0.0f);
+            indices.push_back(vertices.size());
+            vertices.push_back(vertex);
+
+            // second triangle
+            vertex.position = ul;
+            vertex.textureCoordinates = glm::vec2(0.0f, 1.0f);
+            indices.push_back(vertices.size());
+            vertices.push_back(vertex);
+
+            vertex.position = lr;
+            vertex.textureCoordinates = glm::vec2(1.0f, 0.0f);
+            indices.push_back(vertices.size());
+            vertices.push_back(vertex);
+
+            vertex.position = ur;
+            vertex.textureCoordinates = glm::vec2(1.0f, 1.0f);
+            indices.push_back(vertices.size());
+            vertices.push_back(vertex);
+        }
+    }
+
+    return Mesh(vertices, indices, textures);
+}
+
 int WorldMap::generateVertexList() {
     if (vertexList != nullptr) {
         delete vertexList;
