@@ -20,8 +20,10 @@ void Mesh::setUpMesh() {
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
-    // copy vertices to VBO
+    // bind VAO
     glBindVertexArray(VAO);
+
+    // copy vertices to VBO
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex),
@@ -33,19 +35,22 @@ void Mesh::setUpMesh() {
                  &indices[0], GL_STATIC_DRAW);
     
     
-    // vertex positions
+    // configure vertex attribute: vertex positions
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                           (void*)0);
+    // tell OpenGL to use vertex attributes from array
     glEnableVertexAttribArray(0);
 
-    // vertex normals 
+    // configure vertex attribute: vertex normals
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                           (void*)offsetof(Vertex, normal));
+    // tell OpenGL to use vertex attributes from array
     glEnableVertexAttribArray(1);
 
-    // vertex texture coordinates
+    // configure vertex attribute: texture coordinates
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                           (void*)offsetof(Vertex, textureCoordinates));
+    // tell OpenGL to use vertex attributes from array
     glEnableVertexAttribArray(2);
 }
 
@@ -53,7 +58,9 @@ void Mesh::draw(Shader &shader) {
     unsigned int diffuseNumber = 1;
     unsigned int specularNumber = 1;
     
+    shader.use();
     for (unsigned int i = 0; i < textures.size(); ++i) {
+        // activate texture unit
         glActiveTexture(GL_TEXTURE0 + i);
 
         std::string textureNumber;
@@ -65,6 +72,7 @@ void Mesh::draw(Shader &shader) {
             textureNumber = std::to_string(specularNumber++);
         }
 
+        // tell OpenGL that the sampler belongs to texture unit i
         shader.setInt(("material." + textureType + textureNumber).c_str(), i);
 
         // bind texture to active texture unit

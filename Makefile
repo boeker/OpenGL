@@ -6,6 +6,7 @@ CXXSOURCES = main.cpp\
 	constants.cpp\
 	gameobject.cpp\
 	game.cpp\
+	gl.cpp\
 	mesh.cpp\
 	model.cpp\
 	shader.cpp\
@@ -19,6 +20,7 @@ HEADERS = camera.h\
 	constants.h\
 	gameobject.h\
 	game.h\
+	gl.h\
 	mesh.h\
 	model.h\
 	shader.h\
