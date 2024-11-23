@@ -4,7 +4,12 @@
 #include "glad/glad.h"
 #include "stb_image.h"
 
-void Texture::setUpTextureObject() {
+unsigned int Texture::createTextureIDFromFile(const std::string &path) {
+    std::cout << "INFO::MESH Loading texture " << path << std::endl;
+
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+
     // bind the texture
     glBindTexture(GL_TEXTURE_2D, textureID);
 
@@ -14,23 +19,8 @@ void Texture::setUpTextureObject() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    // unbind texture object
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-Texture::Texture() {
-    glGenTextures(1, &textureID);
-    setUpTextureObject();
-}
-
-void Texture::bind() {
-    glBindTexture(GL_TEXTURE_2D, textureID);
-}
-
-void Texture::loadFromFile(const std::string &filename) {
-    glBindTexture(GL_TEXTURE_2D, textureID);
-
-    unsigned char *data = stbi_load(filename.c_str(), &width, &height, &numberOfChannels, 0);
+    int width, height, numberOfChannels;
+    unsigned char *data = stbi_load(path.c_str(), &width, &height, &numberOfChannels, 0);
     
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -41,5 +31,15 @@ void Texture::loadFromFile(const std::string &filename) {
 
     stbi_image_free(data);
 
-    glBindTexture(GL_TEXTURE_2D, 0);
+    return textureID;
 }
+
+Texture Texture::createTextureFromFile(const std::string &path, const std::string &type) {
+    Texture texture;
+    texture.id = createTextureIDFromFile(path);
+    texture.type = type;
+    texture.pathOfFile = path;
+
+    return texture;
+}
+

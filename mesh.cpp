@@ -2,11 +2,11 @@
 
 #include "stb_image.h"
 
-std::vector<TextureStruct> loadedTextures;
+std::vector<Texture> loadedTextures;
 
-Mesh::Mesh(std::vector<VertexStruct> vertices,
+Mesh::Mesh(std::vector<Vertex> vertices,
            std::vector<unsigned int> indices,
-           std::vector<TextureStruct> textures) {
+           std::vector<Texture> textures) {
     this->vertices = vertices;
     this->indices = indices;
     this->textures = textures;
@@ -24,7 +24,7 @@ void Mesh::setUpMesh() {
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexStruct),
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex),
                  &vertices[0], GL_STATIC_DRAW);
     
     // copy indices to EBO
@@ -34,18 +34,18 @@ void Mesh::setUpMesh() {
     
     
     // vertex positions
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexStruct),
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                           (void*)0);
     glEnableVertexAttribArray(0);
 
     // vertex normals 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexStruct),
-                          (void*)offsetof(VertexStruct, normal));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                          (void*)offsetof(Vertex, normal));
     glEnableVertexAttribArray(1);
 
     // vertex texture coordinates
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(VertexStruct),
-                          (void*)offsetof(VertexStruct, textureCoordinates));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                          (void*)offsetof(Vertex, textureCoordinates));
     glEnableVertexAttribArray(2);
 }
 
@@ -80,12 +80,12 @@ void Mesh::draw(Shader &shader) {
 }
 
 Mesh Mesh::fromAssimpMesh(aiMesh *mesh, const aiScene *scene, std::string &directory) {
-    std::vector<VertexStruct> vertices;
+    std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
-    std::vector<TextureStruct> textures;
+    std::vector<Texture> textures;
 
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
-        VertexStruct vertex;
+        Vertex vertex;
 
         vertex.position.x = mesh->mVertices[i].x;
         vertex.position.y = mesh->mVertices[i].y;
@@ -119,12 +119,12 @@ Mesh Mesh::fromAssimpMesh(aiMesh *mesh, const aiScene *scene, std::string &direc
     if (mesh->mMaterialIndex >= 0) {
         aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
         
-        std::vector<TextureStruct> diffuseMaps
+        std::vector<Texture> diffuseMaps
             = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", directory);
     
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
-        std::vector<TextureStruct> specularMaps
+        std::vector<Texture> specularMaps
             = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular", directory);
     
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
@@ -135,11 +135,11 @@ Mesh Mesh::fromAssimpMesh(aiMesh *mesh, const aiScene *scene, std::string &direc
     return Mesh(vertices, indices, textures);
 }
 
-std::vector<TextureStruct> Mesh::loadMaterialTextures(aiMaterial *material,
+std::vector<Texture> Mesh::loadMaterialTextures(aiMaterial *material,
                                                       aiTextureType type,
                                                       std::string typeName,
                                                       std::string &directory) {
-    std::vector<TextureStruct> textures;
+    std::vector<Texture> textures;
     for (unsigned int i = 0; i < material->GetTextureCount(type); ++i) {
         aiString filename;
         material->GetTexture(type, i, &filename);
@@ -156,7 +156,7 @@ std::vector<TextureStruct> Mesh::loadMaterialTextures(aiMaterial *material,
         }
 
         if (!alreadyLoaded) {
-            TextureStruct texture = createTextureFromFile(path, typeName);
+            Texture texture = Texture::createTextureFromFile(path, typeName);
 
             textures.push_back(texture);
             loadedTextures.push_back(texture);
@@ -164,43 +164,4 @@ std::vector<TextureStruct> Mesh::loadMaterialTextures(aiMaterial *material,
     }
 
     return textures;
-}
-
-unsigned int Mesh::createTextureIDFromFile(const std::string &path) {
-    std::cout << "INFO::MESH Loading texture " << path << std::endl;
-
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-
-    // bind the texture
-    glBindTexture(GL_TEXTURE_2D, textureID);
-
-    // set the texture wrapping/filtering options (on the currently bound texture object)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    int width, height, numberOfChannels;
-    unsigned char *data = stbi_load(path.c_str(), &width, &height, &numberOfChannels, 0);
-    
-    if (data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    } else {
-        std::cerr << "ERROR::TEXTURE::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
-    }
-
-    stbi_image_free(data);
-
-    return textureID;
-}
-
-TextureStruct Mesh::createTextureFromFile(const std::string &path, const std::string &type) {
-    TextureStruct texture;
-    texture.id = createTextureIDFromFile(path);
-    texture.type = type;
-    texture.pathOfFile = path;
-
-    return texture;
 }

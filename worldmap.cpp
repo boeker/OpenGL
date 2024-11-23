@@ -53,11 +53,11 @@ void WorldMap::generateMap() {
 }
 
 Mesh WorldMap::generateMesh() {
-    std::vector<TextureStruct> textures;
-    TextureStruct texture = Mesh::createTextureFromFile("textures/moon2.jpg", "texture_diffuse");
+    std::vector<Texture> textures;
+    Texture texture = Texture::createTextureFromFile("textures/moon2.jpg", "texture_diffuse");
     textures.push_back(texture);
 
-    std::vector<VertexStruct> vertices;
+    std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
     for (int x = 1; x < SIZE; ++x) {
@@ -69,7 +69,7 @@ Mesh WorldMap::generateMesh() {
             glm::vec3 ur = glm::vec3((float) x, heightMap[x][y], (float) y);
 
             // generate two triangles for the current square
-            VertexStruct vertex;
+            Vertex vertex;
 
             // first triangle
             vertex.position = ll;

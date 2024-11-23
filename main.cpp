@@ -131,17 +131,17 @@ Mesh generateCubeMesh() {
         -0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f
     };
 
-    std::vector<VertexStruct> vertices;
+    std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
-    VertexStruct *asVertices = (VertexStruct*)cubeVerticesNew;
+    Vertex *asVertices = (Vertex*)cubeVerticesNew;
     for (int i = 0; i < 36; ++i) {
         vertices.push_back(asVertices[i]);
         indices.push_back(i);
     }
 
 
-    std::vector<TextureStruct> textures;
-    TextureStruct cont = Mesh::createTextureFromFile("textures/container.jpg", "texture_diffuse");
+    std::vector<Texture> textures;
+    Texture cont = Texture::createTextureFromFile("textures/container.jpg", "texture_diffuse");
     textures.push_back(cont);
 
     return Mesh(vertices, indices, textures);
@@ -277,7 +277,7 @@ int main(int argc, char *argv[]) {
     Model backpack;
     backpack.loadModel("models/backpack/backpack.obj");
 
-    TextureStruct wall = Mesh::createTextureFromFile("textures/wall.jpg", "texture_diffuse");
+    Texture wall = Texture::createTextureFromFile("textures/wall.jpg", "texture_diffuse");
 
     Model crateModel(generateCubeMesh());
 

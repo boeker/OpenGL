@@ -3,20 +3,13 @@
 
 #include <string>
 
-class Texture {
-private:
-    unsigned int textureID;
+struct Texture {
+    unsigned int id;
+    std::string type;
+    std::string pathOfFile;
 
-    int width;
-    int height;
-    int numberOfChannels;
-
-    void setUpTextureObject();
-
-public:
-    Texture();
-    void bind();
-    void loadFromFile(const std::string &filename);
+    static unsigned int createTextureIDFromFile(const std::string &path);
+    static Texture createTextureFromFile(const std::string &path, const std::string &type);
 };
 
 #endif
