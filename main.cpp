@@ -291,6 +291,13 @@ int main(int argc, char *argv[]) {
         playerObject.draw(modelShader);
 
         // light source
+        glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+        float intensity = 0.25f + 0.75f * 0.5f * (sin(glfwGetTime()) + 1.0f);
+        lightColor = intensity * lightColor;
+
+
+
+
         glm::vec3 lightPos(2.0f, 7.0f, 2.0f); 
         float angle = 50.0f * (float)glfwGetTime();
         glm::mat4 rot = glm::mat4(1.0f);
@@ -307,6 +314,7 @@ int main(int argc, char *argv[]) {
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.2f));
     
         lightsourceShader.use();
+        lightsourceShader.setVec3v("lightSourceColor", lightColor);
         lightsourceShader.setMat4("view", camera.getViewMatrix());
         lightsourceShader.setMat4("projection", projection);
         lightsourceShader.setMat4("model", modelMatrix);
@@ -323,12 +331,23 @@ int main(int argc, char *argv[]) {
         lightShader.use();
 
         glm::vec3 viewSpaceLightPos = glm::vec3(camera.getViewMatrix() * glm::vec4(lightPos, 1.0f));
-        lightShader.setVec3("lightPos", viewSpaceLightPos);
 
         glCheckError();
 
-        lightShader.setVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
-        lightShader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        lightShader.setVec3("material.ambient", 0.0f, 1.0f, 0.6f);
+        lightShader.setVec3("material.diffuse", 0.0f, 1.0f, 1.0);
+        lightShader.setVec3("material.specular", 0.5, 0.5, 0.5);
+        lightShader.setFloat("material.shininess", 32.0f);
+
+        lightShader.setVec3v("light.position", viewSpaceLightPos);
+
+        glm::vec3 ambientColor = lightColor * glm::vec3(0.1f); 
+        glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f); 
+
+        lightShader.setVec3v("light.ambient", ambientColor);
+        lightShader.setVec3v("light.diffuse", diffuseColor);
+        lightShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
         lightShader.setMat4("view", camera.getViewMatrix());
         lightShader.setMat4("projection", projection);
         lightShader.setMat4("model", modelMatrix);
