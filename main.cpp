@@ -3,6 +3,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "glm/gtx/string_cast.hpp"
 #include "stb_image.h"
 
 #include <iostream>
@@ -321,8 +322,8 @@ int main(int argc, char *argv[]) {
 
         lightShader.use();
 
-        lightShader.setVec3("lightPos", lightPos);
-        lightShader.setVec3("cameraPos", camera.getPosition());
+        glm::vec3 viewSpaceLightPos = glm::vec3(camera.getViewMatrix() * glm::vec4(lightPos, 1.0f));
+        lightShader.setVec3("lightPos", viewSpaceLightPos);
 
         glCheckError();
 

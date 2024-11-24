@@ -2,13 +2,15 @@
 
 in vec3 Normal;
 in vec3 FragPos;
+//in vec3 LightPos;
 
 out vec4 FragColor;
 
 uniform vec3 objectColor;
 uniform vec3 lightColor;
+
 uniform vec3 lightPos;
-uniform vec3 cameraPos;
+
 
 void main() {
     // ambient lighting
@@ -23,7 +25,7 @@ void main() {
     // specular lighting
     float specularStrength = 0.5f;
     int shininess = 32;
-    vec3 viewingDirection = normalize(cameraPos - FragPos);
+    vec3 viewingDirection = normalize(-FragPos); // camera position in view space is the origin
     vec3 reflectionDirection = reflect(-lightDirection, normalizedNormal);
     float spec = pow(max(dot(viewingDirection, reflectionDirection), 0.0), shininess);
     vec3 specular = specularStrength * spec * lightColor;
