@@ -162,3 +162,7 @@ void Camera::adjustDistance(float offset) {
 void Camera::setRunning(bool running) {
     this->running = running;
 }
+
+glm::vec3 Camera::getPosition() const {
+    return position;
+}

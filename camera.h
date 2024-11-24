@@ -50,6 +50,8 @@ public:
     void adjustDistance(float offset);
 
     void setRunning(bool running);
+
+    glm::vec3 getPosition() const;
 };
 
 #endif
