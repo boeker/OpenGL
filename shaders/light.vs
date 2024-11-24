@@ -6,9 +6,6 @@ layout (location = 2) in vec3 aTexCoord;
 
 out vec3 Normal;
 out vec3 FragPos;
-//out vec3 LightPos;
-
-//uniform vec3 lightPos;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -18,5 +15,4 @@ void main() {
     gl_Position = projection * view * model * vec4(aPos, 1.0f);
     FragPos = vec3(view * model * vec4(aPos, 1.0)); // fragment position in view coordinates
     Normal = mat3(transpose(inverse(view * model))) * aNormal;
-    //LightPos = vec3(view * vec4(lightPos, 1.0f));
 }

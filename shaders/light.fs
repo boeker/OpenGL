@@ -2,7 +2,6 @@
 
 in vec3 Normal;
 in vec3 FragPos;
-//in vec3 LightPos;
 
 out vec4 FragColor;
 
