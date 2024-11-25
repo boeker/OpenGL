@@ -200,7 +200,7 @@ int main(int argc, char *argv[]) {
 
     Shader modelShader("shaders/model.vs", "shaders/model.fs");
     Shader lightShader("shaders/light.vs", "shaders/light.fs");
-    Shader lightModelShader("shaders/lightmodel.vs", "shaders/lightmodel.fs");
+    Shader lightMapsShader("shaders/lightmaps.vs", "shaders/lightmaps.fs");
     Shader lightsourceShader("shaders/light.vs", "shaders/lightsource.fs");
 
     // generate height map and create model from it
@@ -346,30 +346,30 @@ int main(int argc, char *argv[]) {
 
 
         // lit object (map)
-        lightModelShader.use();
+        lightMapsShader.use();
 
         // position of light
-        lightModelShader.setVec3v("light.position", viewSpaceLightPos);
+        lightMapsShader.setVec3v("light.position", viewSpaceLightPos);
 
         ambientColor = lightColor * glm::vec3(0.1f); 
         diffuseColor = lightColor * glm::vec3(0.5f); 
-        lightModelShader.setVec3v("light.ambient", ambientColor);
-        lightModelShader.setVec3v("light.diffuse", diffuseColor);
-        lightModelShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+        lightMapsShader.setVec3v("light.ambient", ambientColor);
+        lightMapsShader.setVec3v("light.diffuse", diffuseColor);
+        lightMapsShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
         // materials of lit object
-        lightModelShader.setVec3("material.ambient", 0.0f, 1.0f, 0.6f);
-        lightModelShader.setVec3("material.diffuse", 0.0f, 1.0f, 1.0);
-        lightModelShader.setVec3("material.specular", 0.5, 0.5, 0.5);
-        lightModelShader.setFloat("material.shininess", 32.0f);
+        lightMapsShader.setVec3("material.ambient", 0.0f, 1.0f, 0.6f);
+        lightMapsShader.setVec3("material.diffuse", 0.0f, 1.0f, 1.0);
+        lightMapsShader.setVec3("material.specular", 0.5, 0.5, 0.5);
+        lightMapsShader.setFloat("material.shininess", 32.0f);
 
         // transformations
-        lightModelShader.setMat4("view", camera.getViewMatrix());
-        lightModelShader.setMat4("projection", projection);
+        lightMapsShader.setMat4("view", camera.getViewMatrix());
+        lightMapsShader.setMat4("projection", projection);
         modelMatrix = glm::mat4(1.0f);
         modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 1.0f, 0.0f));
-        lightModelShader.setMat4("model", modelMatrix);
-        crateModel.draw(lightModelShader);
+        lightMapsShader.setMat4("model", modelMatrix);
+        crateModel.draw(lightMapsShader);
 
 
         glCheckError();
