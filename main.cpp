@@ -291,7 +291,7 @@ int main(int argc, char *argv[]) {
 
         }
 
-        playerObject.draw(modelShader);
+        //playerObject.draw(modelShader);
 
         // light source
         glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
@@ -375,6 +375,9 @@ int main(int argc, char *argv[]) {
         modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 1.0f, 0.0f));
         lightMapsShader.setMat4("model", modelMatrix);
         crateModel.draw(lightMapsShader);
+
+
+        playerObject.draw(lightMapsShader);
 
 
         glCheckError();
