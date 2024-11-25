@@ -79,7 +79,9 @@ Mesh generateCubeMesh() {
 
     std::vector<Texture> textures;
     Texture cont = Texture::createTextureFromFile("textures/container2.png", "texture_diffuse");
+    Texture contSpecular = Texture::createTextureFromFile("textures/container2_specular.png", "texture_specular");
     textures.push_back(cont);
+    textures.push_back(contSpecular);
 
     return Mesh(vertices, indices, textures);
 }
@@ -345,8 +347,10 @@ int main(int argc, char *argv[]) {
         crateModel.draw(lightShader);
 
 
+        glCheckError();
         // lit object (map)
         lightMapsShader.use();
+        glCheckError();
 
         // position of light
         lightMapsShader.setVec3v("light.position", viewSpaceLightPos);
@@ -356,12 +360,13 @@ int main(int argc, char *argv[]) {
         lightMapsShader.setVec3v("light.ambient", ambientColor);
         lightMapsShader.setVec3v("light.diffuse", diffuseColor);
         lightMapsShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+        glCheckError();
 
         // materials of lit object
-        lightMapsShader.setVec3("material.ambient", 0.0f, 1.0f, 0.6f);
-        lightMapsShader.setVec3("material.diffuse", 0.0f, 1.0f, 1.0);
         lightMapsShader.setVec3("material.specular", 0.5, 0.5, 0.5);
         lightMapsShader.setFloat("material.shininess", 32.0f);
+
+        glCheckError();
 
         // transformations
         lightMapsShader.setMat4("view", camera.getViewMatrix());
