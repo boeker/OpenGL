@@ -78,7 +78,7 @@ Mesh generateCubeMesh() {
 
 
     std::vector<Texture> textures;
-    Texture cont = Texture::createTextureFromFile("textures/container.jpg", "texture_diffuse");
+    Texture cont = Texture::createTextureFromFile("textures/container2.png", "texture_diffuse");
     textures.push_back(cont);
 
     return Mesh(vertices, indices, textures);
@@ -200,6 +200,7 @@ int main(int argc, char *argv[]) {
 
     Shader modelShader("shaders/model.vs", "shaders/model.fs");
     Shader lightShader("shaders/light.vs", "shaders/light.fs");
+    Shader lightModelShader("shaders/lightmodel.vs", "shaders/lightmodel.fs");
     Shader lightsourceShader("shaders/light.vs", "shaders/lightsource.fs");
 
     // generate height map and create model from it
@@ -292,23 +293,19 @@ int main(int argc, char *argv[]) {
 
         // light source
         glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-        float intensity = 0.25f + 0.75f * 0.5f * (sin(glfwGetTime()) + 1.0f);
-        lightColor = intensity * lightColor;
+        //float intensity = 0.25f + 0.75f * 0.5f * (sin(glfwGetTime()) + 1.0f);
+        //lightColor = intensity * lightColor;
 
 
 
-
-        glm::vec3 lightPos(2.0f, 7.0f, 2.0f); 
+        // light position
         float angle = 50.0f * (float)glfwGetTime();
         glm::mat4 rot = glm::mat4(1.0f);
         rot = glm::rotate(rot, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
-        glm::vec4 lightPosTest(1.2f, 3.0f, 2.0f, 1.0f); 
-        glm::vec4 test = rot * lightPosTest;
-        lightPos.x = test.x;
-        lightPos.y = test.y;
-        lightPos.z = test.z;
+        glm::vec3 lightPos(rot * glm::vec4(1.2f, 3.0f, 2.0f, 1.0f)); 
+        glm::vec3 viewSpaceLightPos = glm::vec3(camera.getViewMatrix() * glm::vec4(lightPos, 1.0f));
 
-
+        // cube representing light
         glm::mat4 modelMatrix = glm::mat4(1.0f);
         modelMatrix = glm::translate(modelMatrix, lightPos);
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.2f));
@@ -321,37 +318,58 @@ int main(int argc, char *argv[]) {
         crateModel.draw(lightsourceShader);
 
 
-        // lit object
-
-        modelMatrix = glm::mat4(1.0f);
-        modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 1.0f, 0.0f));
-
-        glCheckError();
-
+        // lit object (material)
         lightShader.use();
 
-        glm::vec3 viewSpaceLightPos = glm::vec3(camera.getViewMatrix() * glm::vec4(lightPos, 1.0f));
+        // position of light
+        lightShader.setVec3v("light.position", viewSpaceLightPos);
 
-        glCheckError();
+        glm::vec3 ambientColor = lightColor * glm::vec3(0.1f); 
+        glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f); 
+        lightShader.setVec3v("light.ambient", ambientColor);
+        lightShader.setVec3v("light.diffuse", diffuseColor);
+        lightShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
+        // materials of lit object
         lightShader.setVec3("material.ambient", 0.0f, 1.0f, 0.6f);
         lightShader.setVec3("material.diffuse", 0.0f, 1.0f, 1.0);
         lightShader.setVec3("material.specular", 0.5, 0.5, 0.5);
         lightShader.setFloat("material.shininess", 32.0f);
 
-        lightShader.setVec3v("light.position", viewSpaceLightPos);
-
-        glm::vec3 ambientColor = lightColor * glm::vec3(0.1f); 
-        glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f); 
-
-        lightShader.setVec3v("light.ambient", ambientColor);
-        lightShader.setVec3v("light.diffuse", diffuseColor);
-        lightShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-
+        // transformations
         lightShader.setMat4("view", camera.getViewMatrix());
         lightShader.setMat4("projection", projection);
+        modelMatrix = glm::mat4(1.0f);
+        modelMatrix = glm::translate(modelMatrix, glm::vec3(3.0f, 3.0f, 3.0f));
         lightShader.setMat4("model", modelMatrix);
         crateModel.draw(lightShader);
+
+
+        // lit object (map)
+        lightModelShader.use();
+
+        // position of light
+        lightModelShader.setVec3v("light.position", viewSpaceLightPos);
+
+        ambientColor = lightColor * glm::vec3(0.1f); 
+        diffuseColor = lightColor * glm::vec3(0.5f); 
+        lightModelShader.setVec3v("light.ambient", ambientColor);
+        lightModelShader.setVec3v("light.diffuse", diffuseColor);
+        lightModelShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+        // materials of lit object
+        lightModelShader.setVec3("material.ambient", 0.0f, 1.0f, 0.6f);
+        lightModelShader.setVec3("material.diffuse", 0.0f, 1.0f, 1.0);
+        lightModelShader.setVec3("material.specular", 0.5, 0.5, 0.5);
+        lightModelShader.setFloat("material.shininess", 32.0f);
+
+        // transformations
+        lightModelShader.setMat4("view", camera.getViewMatrix());
+        lightModelShader.setMat4("projection", projection);
+        modelMatrix = glm::mat4(1.0f);
+        modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 1.0f, 0.0f));
+        lightModelShader.setMat4("model", modelMatrix);
+        crateModel.draw(lightModelShader);
 
 
         glCheckError();
