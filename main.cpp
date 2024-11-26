@@ -259,7 +259,7 @@ int main(int argc, char *argv[]) {
         playerObject.simulateGravity(deltaTime);
 
         // rendering
-        glClearColor(0.0f, 0.5f, 0.5f, 1.0f); // state-setting function
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // state-setting function
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // state-using function
 
         glCheckError();
@@ -276,19 +276,6 @@ int main(int argc, char *argv[]) {
 
         glCheckError();
         
-        for (unsigned int i = 0; i < 10; ++i) {
-            glm::mat4 modelMatrix = glm::mat4(1.0f);
-            modelMatrix = glm::translate(modelMatrix, cubePositions[i]);
-            modelMatrix = glm::translate(modelMatrix, glm::vec3(102.0f, 41.0f, 102.0f));
-            float angle = 20.0f * i + 50.0f * (float)glfwGetTime();
-            modelMatrix = glm::rotate(modelMatrix, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-
-            modelShader.setMat4("model", modelMatrix);
-
-            crateModel.draw(modelShader);
-
-        }
-
         //playerObject.draw(modelShader);
 
         // light source
@@ -299,11 +286,11 @@ int main(int argc, char *argv[]) {
 
 
         // light position
-        float angle = 50.0f * (float)glfwGetTime();
+        float angle = 20.0f * (float)glfwGetTime();
         glm::mat4 rot = glm::mat4(1.0f);
-        rot = glm::translate(rot, glm::vec3(100.0f, 45.0f, 100.0f));
+        rot = glm::translate(rot, glm::vec3(100.0f, 40.0f, 100.0f));
         rot = glm::rotate(rot, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
-        glm::vec3 lightPos(rot * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)); 
+        glm::vec3 lightPos(rot * glm::vec4(75.0f, 1.0f, 0.0f, 1.0f)); 
         glm::vec3 viewSpaceLightPos = glm::vec3(camera.getViewMatrix() * glm::vec4(lightPos, 1.0f));
 
         // cube representing light
@@ -325,11 +312,12 @@ int main(int argc, char *argv[]) {
         // position of light
         lightShader.setVec3v("light.position", viewSpaceLightPos);
 
-        glm::vec3 ambientColor = lightColor * glm::vec3(0.1f); 
-        glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f); 
+        glm::vec3 ambientColor = lightColor * glm::vec3(0.05f); 
+        glm::vec3 diffuseColor = lightColor * glm::vec3(0.8f); 
+        glm::vec3 specularColor = lightColor * glm::vec3(1.0f); 
         lightShader.setVec3v("light.ambient", ambientColor);
         lightShader.setVec3v("light.diffuse", diffuseColor);
-        lightShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+        lightShader.setVec3v("light.specular", specularColor);
 
         // materials of lit object
         lightShader.setVec3("material.ambient", 0.0f, 1.0f, 0.6f);
@@ -341,7 +329,7 @@ int main(int argc, char *argv[]) {
         lightShader.setMat4("view", camera.getViewMatrix());
         lightShader.setMat4("projection", projection);
         modelMatrix = glm::mat4(1.0f);
-        modelMatrix = glm::translate(modelMatrix, glm::vec3(3.0f, 3.0f, 3.0f));
+        modelMatrix = glm::translate(modelMatrix, glm::vec3(99.0f, 38.5f, 99.0f));
         lightShader.setMat4("model", modelMatrix);
         crateModel.draw(lightShader);
 
@@ -354,11 +342,9 @@ int main(int argc, char *argv[]) {
         // position of light
         lightMapsShader.setVec3v("light.position", viewSpaceLightPos);
 
-        ambientColor = lightColor * glm::vec3(0.1f); 
-        diffuseColor = lightColor * glm::vec3(0.8f); 
         lightMapsShader.setVec3v("light.ambient", ambientColor);
         lightMapsShader.setVec3v("light.diffuse", diffuseColor);
-        lightMapsShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+        lightMapsShader.setVec3v("light.specular", specularColor);
         glCheckError();
 
         // materials of lit object
@@ -371,7 +357,7 @@ int main(int argc, char *argv[]) {
         lightMapsShader.setMat4("view", camera.getViewMatrix());
         lightMapsShader.setMat4("projection", projection);
         modelMatrix = glm::mat4(1.0f);
-        modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 1.0f, 0.0f));
+        modelMatrix = glm::translate(modelMatrix, glm::vec3(100.0f, 42.0f, 100.0f));
         lightMapsShader.setMat4("model", modelMatrix);
         crateModel.draw(lightMapsShader);
 
@@ -379,6 +365,20 @@ int main(int argc, char *argv[]) {
         playerObject.draw(lightMapsShader);
 
         mapObject.draw(lightMapsShader);
+
+        for (unsigned int i = 0; i < 10; ++i) {
+            glm::mat4 modelMatrix = glm::mat4(1.0f);
+            modelMatrix = glm::translate(modelMatrix, cubePositions[i]);
+            modelMatrix = glm::translate(modelMatrix, glm::vec3(102.0f, 41.0f, 102.0f));
+            float angle = 20.0f * i + 50.0f * (float)glfwGetTime();
+            modelMatrix = glm::rotate(modelMatrix, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+
+            modelShader.setMat4("model", modelMatrix);
+
+            crateModel.draw(lightMapsShader);
+
+        }
+
 
         glCheckError();
 

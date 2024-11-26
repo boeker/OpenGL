@@ -9,6 +9,16 @@ WorldMap::WorldMap() {
     }
 
     vertexList = nullptr;
+
+    normals = new glm::vec3**[SIZE - 1];
+
+    for (int i = 0; i < SIZE - 1; ++i) {
+        normals[i] = new glm::vec3*[SIZE - 1];
+        
+        for (int j = 0; j < SIZE - 1; ++j) {
+            normals[i][j] = new glm::vec3[2];
+        }
+    }
 }
 
 WorldMap::~WorldMap() {
@@ -16,6 +26,15 @@ WorldMap::~WorldMap() {
         delete[] heightMap[i];
     }
     delete[] heightMap;
+
+    for (int i = 0; i < SIZE - 1; ++i) {
+        
+        for (int j = 0; j < SIZE - 1; ++j) {
+            delete[] normals[i][j];
+        }
+        delete[] normals[i];
+    }
+    delete[] normals;
 }
 
 void WorldMap::generateMap() {
@@ -54,6 +73,35 @@ void WorldMap::generateMap() {
     }
 }
 
+glm::vec3 WorldMap::computeNormal(unsigned int x, unsigned int y) {
+    std::vector<glm::vec3> normalCandidates;
+
+    if (x > 0 && y < SIZE - 1) {
+        normalCandidates.push_back(normals[x - 1][y][0]);
+        normalCandidates.push_back(normals[x - 1][y][1]);
+    }
+
+    if (y > 0 && x < SIZE - 1) {
+        normalCandidates.push_back(normals[x][y - 1][0]);
+        normalCandidates.push_back(normals[x][y - 1][1]);
+    }
+
+    if (x > 0 && y > 0) {
+        normalCandidates.push_back(normals[x - 1][y - 1][1]);
+    }
+
+    if (x < SIZE - 1 && y < SIZE - 1) {
+        normalCandidates.push_back(normals[x][y][0]);
+    }
+
+    glm::vec3 normal(0.0f, 0.0f, 0.0f);
+    for (const glm::vec3 &vec : normalCandidates) {
+        normal += vec;
+    }
+
+    return (1.0f / (float)normalCandidates.size()) * normal;
+}
+
 Mesh WorldMap::generateMesh() {
     std::vector<Texture> textures;
     Texture texture = Texture::createTextureFromFile("textures/moon2.jpg", "texture_diffuse");
@@ -61,9 +109,7 @@ Mesh WorldMap::generateMesh() {
     Texture texture_specular = Texture::createTextureFromFile("textures/moon2_specular.jpg", "texture_specular");
     textures.push_back(texture_specular);
 
-    std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
-
+    // generate normals
     for (int x = 1; x < SIZE; ++x) {
         for (int y = 1; y < SIZE; ++y) {
             // current square
@@ -72,61 +118,74 @@ Mesh WorldMap::generateMesh() {
             glm::vec3 ul = glm::vec3((float) (x - 1), heightMap[x - 1][y], (float) y);
             glm::vec3 ur = glm::vec3((float) x, heightMap[x][y], (float) y);
 
+            glm::vec3 firstNormal = glm::normalize(glm::cross(ul - ll, lr - ll));
+            glm::vec3 secondNormal = glm::normalize(glm::cross(ur - ul, lr - ul));
+
+            normals[x - 1][y - 1][0] = firstNormal;
+            normals[x - 1][y - 1][1] = secondNormal;
+
+        }
+    }
+
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+
+    for (int x = 1; x < SIZE; ++x) {
+        for (int y = 1; y < SIZE; ++y) {
+            // current square
+            glm::vec3 ll = glm::vec3((float) (x - 1), heightMap[x - 1][y - 1], (float) (y - 1));
+            glm::vec3 llNormal = computeNormal(x - 1, y - 1);
+
+            glm::vec3 lr = glm::vec3((float) x, heightMap[x][y - 1], (float) (y - 1));
+            glm::vec3 lrNormal = computeNormal(x, y - 1);
+
+            glm::vec3 ul = glm::vec3((float) (x - 1), heightMap[x - 1][y], (float) y);
+            glm::vec3 ulNormal = computeNormal(x - 1, y);
+
+            glm::vec3 ur = glm::vec3((float) x, heightMap[x][y], (float) y);
+            glm::vec3 urNormal = computeNormal(x, y);
+
             // generate two triangles for the current square
             Vertex vertex;
 
             // first triangle
             vertex.position = ll;
-            vertex.normal = glm::normalize(glm::cross(ul - ll, lr - ll));
-            if (x == 1 && y == 1) {
-                std::cout << glm::to_string(vertex.normal) << std::endl;
-            }
+            vertex.normal = llNormal;
             vertex.textureCoordinates = glm::vec2(0.0f, 0.0f);
             indices.push_back(vertices.size());
             vertices.push_back(vertex);
 
             vertex.position = ul;
-            vertex.normal = glm::normalize(glm::cross(lr - ul, ll - ul));
+            vertex.normal = ulNormal;
             vertex.textureCoordinates = glm::vec2(0.0f, 1.0f);
             indices.push_back(vertices.size());
             vertices.push_back(vertex);
 
             vertex.position = lr;
-            vertex.normal = glm::normalize(glm::cross(ll - lr, ul - lr));
-            if (x == 1 && y == 1) {
-                std::cout << glm::to_string(vertex.normal) << std::endl;
-            }
+            vertex.normal = lrNormal;
             vertex.textureCoordinates = glm::vec2(1.0f, 0.0f);
             indices.push_back(vertices.size());
             vertices.push_back(vertex);
 
             // second triangle
             vertex.position = ul;
-            vertex.normal = glm::normalize(glm::cross(ur - ul, lr - ul));
-            if (x == 1 && y == 1) {
-                std::cout << glm::to_string(vertex.normal) << std::endl;
-            }
+            vertex.normal = ulNormal;
             vertex.textureCoordinates = glm::vec2(0.0f, 1.0f);
             indices.push_back(vertices.size());
             vertices.push_back(vertex);
 
             vertex.position = lr;
-            vertex.normal = glm::normalize(glm::cross(ul - lr, ur - lr));
-            if (x == 1 && y == 1) {
-                std::cout << glm::to_string(vertex.normal) << std::endl;
-            }
+            vertex.normal = lrNormal;
             vertex.textureCoordinates = glm::vec2(1.0f, 0.0f);
             indices.push_back(vertices.size());
             vertices.push_back(vertex);
 
             vertex.position = ur;
-            vertex.normal = glm::normalize(glm::cross(lr - ur, ul - ur));
-            if (x == 1 && y == 1) {
-                std::cout << glm::to_string(vertex.normal) << std::endl;
-            }
+            vertex.normal = urNormal;
             vertex.textureCoordinates = glm::vec2(1.0f, 1.0f);
             indices.push_back(vertices.size());
             vertices.push_back(vertex);
+
         }
     }
 
