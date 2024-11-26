@@ -244,6 +244,8 @@ int main(int argc, char *argv[]) {
     };
 
     glEnable(GL_DEPTH_TEST);
+    
+    // wireframe mode
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // render loop
@@ -274,10 +276,6 @@ int main(int argc, char *argv[]) {
 
         glCheckError();
         
-        mapObject.draw(modelShader);
-
-        glCheckError();
-
         for (unsigned int i = 0; i < 10; ++i) {
             glm::mat4 modelMatrix = glm::mat4(1.0f);
             modelMatrix = glm::translate(modelMatrix, cubePositions[i]);
@@ -303,8 +301,9 @@ int main(int argc, char *argv[]) {
         // light position
         float angle = 50.0f * (float)glfwGetTime();
         glm::mat4 rot = glm::mat4(1.0f);
+        rot = glm::translate(rot, glm::vec3(100.0f, 45.0f, 100.0f));
         rot = glm::rotate(rot, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
-        glm::vec3 lightPos(rot * glm::vec4(1.2f, 3.0f, 2.0f, 1.0f)); 
+        glm::vec3 lightPos(rot * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)); 
         glm::vec3 viewSpaceLightPos = glm::vec3(camera.getViewMatrix() * glm::vec4(lightPos, 1.0f));
 
         // cube representing light
@@ -356,7 +355,7 @@ int main(int argc, char *argv[]) {
         lightMapsShader.setVec3v("light.position", viewSpaceLightPos);
 
         ambientColor = lightColor * glm::vec3(0.1f); 
-        diffuseColor = lightColor * glm::vec3(0.5f); 
+        diffuseColor = lightColor * glm::vec3(0.8f); 
         lightMapsShader.setVec3v("light.ambient", ambientColor);
         lightMapsShader.setVec3v("light.diffuse", diffuseColor);
         lightMapsShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
@@ -378,6 +377,11 @@ int main(int argc, char *argv[]) {
 
 
         playerObject.draw(lightMapsShader);
+
+        mapObject.draw(lightMapsShader);
+
+        glCheckError();
+
 
 
         glCheckError();

@@ -1,5 +1,7 @@
 #include "worldmap.h"
 
+#include "glm/gtx/string_cast.hpp"
+
 WorldMap::WorldMap() {
     heightMap = new float*[SIZE];
     for (int i = 0; i < SIZE; ++i) {
@@ -56,6 +58,8 @@ Mesh WorldMap::generateMesh() {
     std::vector<Texture> textures;
     Texture texture = Texture::createTextureFromFile("textures/moon2.jpg", "texture_diffuse");
     textures.push_back(texture);
+    Texture texture_specular = Texture::createTextureFromFile("textures/moon2_specular.jpg", "texture_specular");
+    textures.push_back(texture_specular);
 
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
@@ -73,33 +77,53 @@ Mesh WorldMap::generateMesh() {
 
             // first triangle
             vertex.position = ll;
-            vertex.normal = glm::vec3(0.0f, 0.0f, 0.0f);
+            vertex.normal = glm::normalize(glm::cross(ul - ll, lr - ll));
+            if (x == 1 && y == 1) {
+                std::cout << glm::to_string(vertex.normal) << std::endl;
+            }
             vertex.textureCoordinates = glm::vec2(0.0f, 0.0f);
             indices.push_back(vertices.size());
             vertices.push_back(vertex);
 
             vertex.position = ul;
+            vertex.normal = glm::normalize(glm::cross(lr - ul, ll - ul));
             vertex.textureCoordinates = glm::vec2(0.0f, 1.0f);
             indices.push_back(vertices.size());
             vertices.push_back(vertex);
 
             vertex.position = lr;
+            vertex.normal = glm::normalize(glm::cross(ll - lr, ul - lr));
+            if (x == 1 && y == 1) {
+                std::cout << glm::to_string(vertex.normal) << std::endl;
+            }
             vertex.textureCoordinates = glm::vec2(1.0f, 0.0f);
             indices.push_back(vertices.size());
             vertices.push_back(vertex);
 
             // second triangle
             vertex.position = ul;
+            vertex.normal = glm::normalize(glm::cross(ur - ul, lr - ul));
+            if (x == 1 && y == 1) {
+                std::cout << glm::to_string(vertex.normal) << std::endl;
+            }
             vertex.textureCoordinates = glm::vec2(0.0f, 1.0f);
             indices.push_back(vertices.size());
             vertices.push_back(vertex);
 
             vertex.position = lr;
+            vertex.normal = glm::normalize(glm::cross(ul - lr, ur - lr));
+            if (x == 1 && y == 1) {
+                std::cout << glm::to_string(vertex.normal) << std::endl;
+            }
             vertex.textureCoordinates = glm::vec2(1.0f, 0.0f);
             indices.push_back(vertices.size());
             vertices.push_back(vertex);
 
             vertex.position = ur;
+            vertex.normal = glm::normalize(glm::cross(lr - ur, ul - ur));
+            if (x == 1 && y == 1) {
+                std::cout << glm::to_string(vertex.normal) << std::endl;
+            }
             vertex.textureCoordinates = glm::vec2(1.0f, 1.0f);
             indices.push_back(vertices.size());
             vertices.push_back(vertex);
