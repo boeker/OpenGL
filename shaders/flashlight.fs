@@ -19,6 +19,8 @@ struct Spotlight {
     float constant;
     float linear;
     float quadratic;
+
+    float enabled;
 };
 
 in vec3 Normal;
@@ -58,8 +60,8 @@ void main() {
     float epsilon = light.cutOff - light.outerCutOff;
     float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0); 
 
-    diffuse *= intensity;
-    specular *= intensity;
+    diffuse *= intensity * light.enabled;
+    specular *= intensity * light.enabled;
 
     vec3 result = ambient + diffuse + specular;
 

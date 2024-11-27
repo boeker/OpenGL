@@ -97,6 +97,8 @@ bool firstMouse = true;
 
 Camera camera;
 
+bool flashlight = false;
+
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     std::cout << "framebuffer_size_callback " << width << "x" << height << std::endl;
     glViewport(0, 0, width, height);
@@ -163,6 +165,10 @@ void processInput(GLFWwindow *window, GameObject *object) {
         } else {
             camera.attach();
         }
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+        flashlight = !flashlight;
     }
 }
 
@@ -356,6 +362,11 @@ int main(int argc, char *argv[]) {
         flashlightShader.setVec3v("light.direction", viewSpacePlayerFront);
         flashlightShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
         flashlightShader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
+        if (flashlight) {
+            flashlightShader.setFloat("light.enabled", 1.0f);
+        } else {
+            flashlightShader.setFloat("light.enabled", 0.0f);
+        }
 
 
         flashlightShader.setVec3v("light.ambient", ambientColor);
