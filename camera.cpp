@@ -143,19 +143,21 @@ void Camera::processFOVChange(float offset) {
 }
 
 void Camera::adjustDistance(float offset) {
-    distance += offset;
-    if (distance < 1.0f) {
-        distance = 1.0f;
-    }
+    if (attached) {
+        distance += offset;
+        if (distance < 1.0f) {
+            distance = 1.0f;
+        }
 
-    if (!firstPerson && distance < 2.0f) {
-        firstPerson = true;
-        distance = 1.0f;
-        player->setDirection(yaw, 0.0f);
-    }
+        if (!firstPerson && distance < 2.0f) {
+            firstPerson = true;
+            distance = 1.0f;
+            player->setDirection(yaw, 0.0f);
+        }
 
-    if (firstPerson && distance >= 2.0f) {
-        firstPerson = false;
+        if (firstPerson && distance >= 2.0f) {
+            firstPerson = false;
+        }
     }
 }
 
@@ -168,7 +170,7 @@ glm::vec3 Camera::getPosition() const {
 }
 
 glm::vec3 Camera::getPlayerPOVPosition() const {
-    if (this->player != nullptr && !firstPerson) {
+    if (this->player != nullptr && (!attached || !firstPerson)) {
         return player->getPosition() + 1.5f * front + 3.0f * up;
 
     } else {
@@ -177,7 +179,7 @@ glm::vec3 Camera::getPlayerPOVPosition() const {
 }
 
 glm::vec3 Camera::getPlayerPOVFront() const {
-    if (this->player != nullptr && !firstPerson) {
+    if (this->player != nullptr && (!attached || !firstPerson)) {
         return player->getFront();
 
     } else {
