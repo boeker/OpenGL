@@ -312,12 +312,19 @@ int main(int argc, char *argv[]) {
         // position of light
         lightShader.setVec3v("light.position", viewSpaceLightPos);
 
-        glm::vec3 ambientColor = lightColor * glm::vec3(0.05f); 
+        glm::vec3 ambientColor = lightColor * glm::vec3(0.1f); 
         glm::vec3 diffuseColor = lightColor * glm::vec3(0.8f); 
         glm::vec3 specularColor = lightColor * glm::vec3(1.0f); 
+        float attenuationConstant = 1.0f;
+        float attenuationLinear = 0.014f;
+        float attenuationQuadratic = 0.0007f;
+
         lightShader.setVec3v("light.ambient", ambientColor);
         lightShader.setVec3v("light.diffuse", diffuseColor);
         lightShader.setVec3v("light.specular", specularColor);
+        lightShader.setFloat("light.constant", attenuationConstant);
+        lightShader.setFloat("light.linear", attenuationLinear);
+        lightShader.setFloat("light.quadratic", attenuationQuadratic);	
 
         // materials of lit object
         lightShader.setVec3("material.ambient", 0.0f, 1.0f, 0.6f);
@@ -342,9 +349,14 @@ int main(int argc, char *argv[]) {
         // position of light
         lightMapsShader.setVec3v("light.position", viewSpaceLightPos);
 
+
         lightMapsShader.setVec3v("light.ambient", ambientColor);
         lightMapsShader.setVec3v("light.diffuse", diffuseColor);
         lightMapsShader.setVec3v("light.specular", specularColor);
+        lightMapsShader.setFloat("light.constant", attenuationConstant);
+        lightMapsShader.setFloat("light.linear", attenuationLinear);
+        lightMapsShader.setFloat("light.quadratic", attenuationQuadratic);	
+
         glCheckError();
 
         // materials of lit object
