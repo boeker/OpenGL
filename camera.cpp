@@ -166,3 +166,21 @@ void Camera::setRunning(bool running) {
 glm::vec3 Camera::getPosition() const {
     return position;
 }
+
+glm::vec3 Camera::getPlayerPOVPosition() const {
+    if (this->player != nullptr && !firstPerson) {
+        return player->getPosition() + 1.5f * front + 3.0f * up;
+
+    } else {
+        return position;
+    }
+}
+
+glm::vec3 Camera::getPlayerPOVFront() const {
+    if (this->player != nullptr && !firstPerson) {
+        return player->getFront();
+
+    } else {
+        return front;
+    }
+}

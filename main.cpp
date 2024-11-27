@@ -349,9 +349,9 @@ int main(int argc, char *argv[]) {
 
         // position of light
 
-        glm::vec3 viewSpacePlayerPosition(camera.getViewMatrix() * glm::vec4(camera.position, 1.0f));
+        glm::vec3 viewSpacePlayerPosition(camera.getViewMatrix() * glm::vec4(camera.getPlayerPOVPosition(), 1.0f));
         glm::mat3 normalMatrix(glm::transpose(glm::inverse(camera.getViewMatrix())));
-        glm::vec3 viewSpacePlayerFront(normalMatrix * camera.front);
+        glm::vec3 viewSpacePlayerFront(normalMatrix * camera.getPlayerPOVFront());
         flashlightShader.setVec3v("light.position", viewSpacePlayerPosition);
         flashlightShader.setVec3v("light.direction", viewSpacePlayerFront);
         flashlightShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));

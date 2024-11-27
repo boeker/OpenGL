@@ -52,6 +52,8 @@ public:
     void setRunning(bool running);
 
     glm::vec3 getPosition() const;
+    glm::vec3 getPlayerPOVPosition() const;
+    glm::vec3 getPlayerPOVFront() const;
 };
 
 #endif
