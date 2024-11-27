@@ -204,6 +204,7 @@ int main(int argc, char *argv[]) {
     Shader lightShader("shaders/light.vs", "shaders/light.fs");
     Shader lightMapsShader("shaders/lightmaps.vs", "shaders/lightmaps.fs");
     Shader lightsourceShader("shaders/light.vs", "shaders/lightsource.fs");
+    Shader flashlightShader("shaders/flashlight.vs", "shaders/flashlight.fs");
 
     // generate height map and create model from it
     WorldMap myWorldMap;
@@ -343,40 +344,47 @@ int main(int argc, char *argv[]) {
 
         glCheckError();
         // lit object (map)
-        lightMapsShader.use();
+        flashlightShader.use();
         glCheckError();
 
         // position of light
-        lightMapsShader.setVec3v("light.position", viewSpaceLightPos);
+
+        glm::vec3 viewSpacePlayerPosition(camera.getViewMatrix() * glm::vec4(camera.position, 1.0f));
+        glm::mat3 normalMatrix(glm::transpose(glm::inverse(camera.getViewMatrix())));
+        glm::vec3 viewSpacePlayerFront(normalMatrix * camera.front);
+        flashlightShader.setVec3v("light.position", viewSpacePlayerPosition);
+        flashlightShader.setVec3v("light.direction", viewSpacePlayerFront);
+        flashlightShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+        flashlightShader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
 
 
-        lightMapsShader.setVec3v("light.ambient", ambientColor);
-        lightMapsShader.setVec3v("light.diffuse", diffuseColor);
-        lightMapsShader.setVec3v("light.specular", specularColor);
-        lightMapsShader.setFloat("light.constant", attenuationConstant);
-        lightMapsShader.setFloat("light.linear", attenuationLinear);
-        lightMapsShader.setFloat("light.quadratic", attenuationQuadratic);	
+        flashlightShader.setVec3v("light.ambient", ambientColor);
+        flashlightShader.setVec3v("light.diffuse", diffuseColor);
+        flashlightShader.setVec3v("light.specular", specularColor);
+        flashlightShader.setFloat("light.constant", attenuationConstant);
+        flashlightShader.setFloat("light.linear", attenuationLinear);
+        flashlightShader.setFloat("light.quadratic", attenuationQuadratic);	
 
         glCheckError();
 
         // materials of lit object
-        lightMapsShader.setVec3("material.specular", 0.5, 0.5, 0.5);
-        lightMapsShader.setFloat("material.shininess", 32.0f);
+        flashlightShader.setVec3("material.specular", 0.5, 0.5, 0.5);
+        flashlightShader.setFloat("material.shininess", 32.0f);
 
         glCheckError();
 
         // transformations
-        lightMapsShader.setMat4("view", camera.getViewMatrix());
-        lightMapsShader.setMat4("projection", projection);
+        flashlightShader.setMat4("view", camera.getViewMatrix());
+        flashlightShader.setMat4("projection", projection);
         modelMatrix = glm::mat4(1.0f);
         modelMatrix = glm::translate(modelMatrix, glm::vec3(100.0f, 42.0f, 100.0f));
-        lightMapsShader.setMat4("model", modelMatrix);
-        crateModel.draw(lightMapsShader);
+        flashlightShader.setMat4("model", modelMatrix);
+        crateModel.draw(flashlightShader);
 
 
-        playerObject.draw(lightMapsShader);
+        playerObject.draw(flashlightShader);
 
-        mapObject.draw(lightMapsShader);
+        mapObject.draw(flashlightShader);
 
         for (unsigned int i = 0; i < 10; ++i) {
             glm::mat4 modelMatrix = glm::mat4(1.0f);
@@ -385,9 +393,9 @@ int main(int argc, char *argv[]) {
             float angle = 20.0f * i + 50.0f * (float)glfwGetTime();
             modelMatrix = glm::rotate(modelMatrix, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 
-            modelShader.setMat4("model", modelMatrix);
+            flashlightShader.setMat4("model", modelMatrix);
 
-            crateModel.draw(lightMapsShader);
+            crateModel.draw(flashlightShader);
 
         }
 
