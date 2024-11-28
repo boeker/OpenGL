@@ -211,6 +211,7 @@ int main(int argc, char *argv[]) {
     Shader lightMapsShader("shaders/lightmaps.vs", "shaders/lightmaps.fs");
     Shader lightsourceShader("shaders/light.vs", "shaders/lightsource.fs");
     Shader flashlightShader("shaders/flashlight.vs", "shaders/flashlight.fs");
+    Shader lightingShader("shaders/lighting.vs", "shaders/lighting.fs");
 
     // generate height map and create model from it
     WorldMap myWorldMap;
@@ -287,6 +288,7 @@ int main(int argc, char *argv[]) {
 
         // light source
         glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+        glm::vec3 redLight(1.0f, 0.0f, 0.0f);
         //float intensity = 0.25f + 0.75f * 0.5f * (sin(glfwGetTime()) + 1.0f);
         //lightColor = intensity * lightColor;
 
@@ -306,7 +308,7 @@ int main(int argc, char *argv[]) {
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.2f));
     
         lightsourceShader.use();
-        lightsourceShader.setVec3v("lightSourceColor", lightColor);
+        lightsourceShader.setVec3v("lightSourceColor", redLight);
         lightsourceShader.setMat4("view", camera.getViewMatrix());
         lightsourceShader.setMat4("projection", projection);
         lightsourceShader.setMat4("model", modelMatrix);
@@ -322,6 +324,9 @@ int main(int argc, char *argv[]) {
         glm::vec3 ambientColor = lightColor * glm::vec3(0.1f); 
         glm::vec3 diffuseColor = lightColor * glm::vec3(0.8f); 
         glm::vec3 specularColor = lightColor * glm::vec3(1.0f); 
+        glm::vec3 ambientRed = redLight * glm::vec3(0.1f); 
+        glm::vec3 diffuseRed = redLight * glm::vec3(0.8f); 
+        glm::vec3 specularRed = redLight * glm::vec3(1.0f); 
         float attenuationConstant = 1.0f;
         float attenuationLinear = 0.014f;
         float attenuationQuadratic = 0.0007f;
@@ -350,7 +355,7 @@ int main(int argc, char *argv[]) {
 
         glCheckError();
         // lit object (map)
-        flashlightShader.use();
+        lightingShader.use();
         glCheckError();
 
         // position of light
@@ -358,44 +363,58 @@ int main(int argc, char *argv[]) {
         glm::vec3 viewSpacePlayerPosition(camera.getViewMatrix() * glm::vec4(camera.getPlayerPOVPosition(), 1.0f));
         glm::mat3 normalMatrix(glm::transpose(glm::inverse(camera.getViewMatrix())));
         glm::vec3 viewSpacePlayerFront(normalMatrix * camera.getPlayerPOVFront());
-        flashlightShader.setVec3v("light.position", viewSpacePlayerPosition);
-        flashlightShader.setVec3v("light.direction", viewSpacePlayerFront);
-        flashlightShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
-        flashlightShader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
+
+        glm::vec3 direction(-2.0f, -1.0f, -0.0f);
+        glm::vec3 viewSpaceDirection(normalMatrix * direction);
+        lightingShader.setVec3v("directionalLight.direction", viewSpaceDirection);
+        lightingShader.setVec3v("directionalLight.ambient", 0.2f * ambientColor);
+        lightingShader.setVec3v("directionalLight.diffuse", 0.2f * diffuseColor);
+        lightingShader.setVec3v("directionalLight.specular", 0.2f * specularColor);
+
+        lightingShader.setVec3v("pointLights[0].position", viewSpaceLightPos);
+        lightingShader.setVec3v("pointLights[0].ambient", ambientRed);
+        lightingShader.setVec3v("pointLights[0].diffuse", diffuseRed);
+        lightingShader.setVec3v("pointLights[0].specular", specularRed);
+        lightingShader.setFloat("pointLights[0].constant", attenuationConstant);
+        lightingShader.setFloat("pointLights[0].linear", attenuationLinear);
+        lightingShader.setFloat("pointLights[0].quadratic", attenuationQuadratic);	
+
+        lightingShader.setVec3v("spotLight.position", viewSpacePlayerPosition);
+        lightingShader.setVec3v("spotLight.direction", viewSpacePlayerFront);
+        lightingShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+        lightingShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
         if (flashlight) {
-            flashlightShader.setFloat("light.enabled", 1.0f);
+            lightingShader.setFloat("spotLight.enabled", 1.0f);
         } else {
-            flashlightShader.setFloat("light.enabled", 0.0f);
+            lightingShader.setFloat("spotLight.enabled", 0.0f);
         }
-
-
-        flashlightShader.setVec3v("light.ambient", ambientColor);
-        flashlightShader.setVec3v("light.diffuse", diffuseColor);
-        flashlightShader.setVec3v("light.specular", specularColor);
-        flashlightShader.setFloat("light.constant", attenuationConstant);
-        flashlightShader.setFloat("light.linear", attenuationLinear);
-        flashlightShader.setFloat("light.quadratic", attenuationQuadratic);	
+        lightingShader.setVec3v("spotLight.ambient", ambientColor);
+        lightingShader.setVec3v("spotLight.diffuse", diffuseColor);
+        lightingShader.setVec3v("spotLight.specular", specularColor);
+        lightingShader.setFloat("spotLight.constant", attenuationConstant);
+        lightingShader.setFloat("spotLight.linear", attenuationLinear);
+        lightingShader.setFloat("spotLight.quadratic", attenuationQuadratic);	
 
         glCheckError();
 
         // materials of lit object
-        flashlightShader.setVec3("material.specular", 0.5, 0.5, 0.5);
-        flashlightShader.setFloat("material.shininess", 32.0f);
+        lightingShader.setVec3("material.specular", 0.5, 0.5, 0.5);
+        lightingShader.setFloat("material.shininess", 32.0f);
 
         glCheckError();
 
         // transformations
-        flashlightShader.setMat4("view", camera.getViewMatrix());
-        flashlightShader.setMat4("projection", projection);
+        lightingShader.setMat4("view", camera.getViewMatrix());
+        lightingShader.setMat4("projection", projection);
         modelMatrix = glm::mat4(1.0f);
         modelMatrix = glm::translate(modelMatrix, glm::vec3(100.0f, 42.0f, 100.0f));
-        flashlightShader.setMat4("model", modelMatrix);
-        crateModel.draw(flashlightShader);
+        lightingShader.setMat4("model", modelMatrix);
+        crateModel.draw(lightingShader);
 
 
-        playerObject.draw(flashlightShader);
+        playerObject.draw(lightingShader);
 
-        mapObject.draw(flashlightShader);
+        mapObject.draw(lightingShader);
 
         for (unsigned int i = 0; i < 10; ++i) {
             glm::mat4 modelMatrix = glm::mat4(1.0f);
@@ -404,9 +423,9 @@ int main(int argc, char *argv[]) {
             float angle = 20.0f * i + 50.0f * (float)glfwGetTime();
             modelMatrix = glm::rotate(modelMatrix, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 
-            flashlightShader.setMat4("model", modelMatrix);
+            lightingShader.setMat4("model", modelMatrix);
 
-            crateModel.draw(flashlightShader);
+            crateModel.draw(lightingShader);
 
         }
 
