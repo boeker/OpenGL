@@ -13,7 +13,7 @@
 
 #include "shader.h"
 #include "camera.h"
-#include "worldmap.h"
+#include "heightmap.h"
 #include "game.h"
 #include "gameobject.h"
 
@@ -214,11 +214,11 @@ int main(int argc, char *argv[]) {
     Shader lightingShader("shaders/lighting.vs", "shaders/lighting.fs");
 
     // generate height map and create model from it
-    WorldMap myWorldMap;
-    myWorldMap.generateMap();
-    Game game(&myWorldMap);
+    HeightMap heightMap;
+    heightMap.generateMap();
+    Game game(&heightMap);
 
-    Model mapModel(myWorldMap.generateMesh());
+    Model mapModel(heightMap.generateMesh());
     GameObject mapObject(&mapModel, &game);
 
     // Load backpack model and use it as player object

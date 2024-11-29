@@ -44,7 +44,7 @@ void GameObject::setYawOffset(const float offset) {
 }
 
 void GameObject::simulateGravity(float deltaTime) {
-    float currentHeight = game->worldMap->getHeight(position.x, position.z);
+    float currentHeight = game->map->getHeight(position.x, position.z);
 
     if (position.y > currentHeight && !falling) {
         falling = true;

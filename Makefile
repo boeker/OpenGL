@@ -7,12 +7,12 @@ CXXSOURCES = main.cpp\
 	gameobject.cpp\
 	game.cpp\
 	gl.cpp\
+	heightmap.cpp\
 	mesh.cpp\
 	model.cpp\
 	shader.cpp\
 	stb_image.cpp\
-	texture.cpp\
-	worldmap.cpp
+	texture.cpp
 
 CSOURCES = glad.c
 
@@ -21,12 +21,12 @@ HEADERS = camera.h\
 	gameobject.h\
 	game.h\
 	gl.h\
+	heightmap.h\
 	mesh.h\
 	model.h\
 	shader.h\
 	stb_image.h\
-	texture.h\
-	worldmap.h
+	texture.h
 
 OBJECTS = $(CXXSOURCES:.cpp=.o) $(CSOURCES:.c=.o)
 
@@ -45,5 +45,5 @@ $(CSOURCES:.c=.o): %.o: %.c $(HEADERS)
 
 .PHONY: clean
 clean:
-	-@rm main $(OBJECTS) 2>/dev/null
+	-@rm main $(OBJECTS) 2>/dev/null || true
 

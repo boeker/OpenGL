@@ -4,16 +4,16 @@
 #include <vector>
 
 #include "gameobject.h"
-#include "worldmap.h"
+#include "heightmap.h"
 
 class Game {
 private:
     std::vector<GameObject> gameObjects;
 
 public:
-    WorldMap *worldMap;
+    HeightMap *map;
 
-    Game(WorldMap *worldMap);
+    Game(HeightMap *map);
 };
 
 #endif
