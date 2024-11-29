@@ -11,43 +11,61 @@ class Game;
 
 class GameObject {
 private:
+    // position of the object
     glm::vec3 position;
-    glm::vec3 front;
-    glm::vec3 up;
-
+    // yaw and pitch, used to compute front vector
     float yaw;
     float pitch;
+    glm::vec3 front;
+    // up vector
+    glm::vec3 up;
 
+    // current movement velocity
     float velocity;
+
+    // is the object in mid-air?
     bool falling;
 
-    Game *game;
-
+    // associated model
     Model *model;
+    // position model relative to the following offsets
     float heightOffset;
     float yawOffset;
+
+    // game this object is associated with
+    Game *game;
+
+    // compute new front vector from yaw and pitch
+    void updateFront();
 
 public:
     GameObject(Model *model, Game *game);
 
+    // getters and setters
     glm::vec3 getPosition() const;
     glm::vec3 getFront() const;
     glm::vec3 getUp() const;
-    void setPosition(const glm::vec3 &newPosition);
+    float getYaw() const;
+    float getPitch() const;
+    void setPosition(const glm::vec3 &position);
     void setHeightOffset(const float offset);
     void setYawOffset(const float offset);
 
+    // process (change of) yaw and pitch and update front vector
     void processDirectionChange(float yawOffset, float pitchOffset);
-    void updateFront();
     void setDirection(float yaw, float pitch);
-    float getYaw();
-    float getPitch();
-    
+
+    // move object by direction
     void move(glm::vec3 direction);
+
+    // launch object into air
     void jump();
 
-    void draw(Shader &shader);
+    // compute new position after deltaTime
     void simulateGravity(float deltaTime);
+
+    // draw model of this object
+    void draw(Shader &shader);
 };
 
 #endif

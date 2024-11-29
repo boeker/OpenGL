@@ -2,13 +2,20 @@
 
 #include "game.h"
 
+void GameObject::updateFront() {
+    glm::vec3 direction;
+    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    direction.y = sin(glm::radians(pitch));
+    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front = glm::normalize(direction);
+}
+
 GameObject::GameObject(Model *model, Game *game) {
     position = glm::vec3(0.0f, 0.0f, 0.0f);
-    front = glm::vec3(0.0f, 0.0f, -1.0f);
-    up = glm::vec3(0.0f, 1.0f, 0.0f);
-
     yaw = 0.0f;
     pitch = 0.0f;
+    updateFront();
+    up = glm::vec3(0.0f, 1.0f, 0.0f);
 
     velocity = 0.0f;
     falling = true;
@@ -16,6 +23,7 @@ GameObject::GameObject(Model *model, Game *game) {
     this->model = model;
     heightOffset = 0.0f;
     yawOffset = 0.0f;
+
     this->game = game;
 }
 
@@ -31,8 +39,16 @@ glm::vec3 GameObject::getUp() const {
     return up;
 }
 
-void GameObject::setPosition(const glm::vec3 &newPosition) {
-    position = newPosition;
+float GameObject::getYaw() const {
+    return yaw;
+}
+
+float GameObject::getPitch() const {
+    return pitch;
+}
+
+void GameObject::setPosition(const glm::vec3 &position) {
+    this->position = position;
 }
 
 void GameObject::setHeightOffset(const float offset) {
@@ -41,6 +57,31 @@ void GameObject::setHeightOffset(const float offset) {
 
 void GameObject::setYawOffset(const float offset) {
     yawOffset = offset;
+}
+
+void GameObject::processDirectionChange(float yawOffset, float pitchOffset) {
+    yaw += yawOffset;
+    pitch += pitchOffset;
+
+    updateFront();
+}
+
+void GameObject::setDirection(float yaw, float pitch) {
+    this->yaw = yaw;
+    this->pitch = pitch;
+
+    updateFront();
+}
+
+void GameObject::move(glm::vec3 direction) {
+    position += direction;
+}
+
+void GameObject::jump() {
+    if (!falling) {
+        falling = true;
+        velocity = -8.0f;
+    }
 }
 
 void GameObject::simulateGravity(float deltaTime) {
@@ -67,46 +108,6 @@ void GameObject::simulateGravity(float deltaTime) {
 
 }
 
-void GameObject::move(glm::vec3 direction) {
-    position += direction;
-}
-
-void GameObject::processDirectionChange(float yawOffset, float pitchOffset) {
-    yaw += yawOffset;
-    pitch += pitchOffset;
-
-    updateFront();
-}
-
-void GameObject::updateFront() {
-    glm::vec3 direction;
-    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    direction.y = sin(glm::radians(pitch));
-    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    front = glm::normalize(direction);
-}
-
-void GameObject::setDirection(float yaw, float pitch) {
-    this->yaw = yaw;
-    this->pitch = pitch;
-
-    updateFront();
-}
-
-float GameObject::getYaw() {
-    return yaw;
-}
-
-float GameObject::getPitch() {
-    return pitch;
-}
-
-void GameObject::jump() {
-    if (!falling) {
-        falling = true;
-        velocity = -8.0f;
-    }
-}
 
 void GameObject::draw(Shader &shader) {
     glm::mat4 model = glm::mat4(1.0f);
