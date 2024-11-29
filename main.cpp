@@ -145,7 +145,7 @@ void processInput(GLFWwindow *window, GameObject *object) {
         camera.processMovement(Direction::RIGHT, deltaTime);
     }
 
-    camera.setRunning(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS);
+    camera.setSprinting(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS);
     
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
         camera.processMovement(Direction::UPWARD, deltaTime);
@@ -156,16 +156,13 @@ void processInput(GLFWwindow *window, GameObject *object) {
     }
 
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-        camera.velocity += -0.22f;
+        //camera.velocity += -0.22f;
     }
 
     if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
-        if (camera.isAttached()) {
-            camera.detach();
-        } else {
-            camera.attach();
-        }
+        camera.setFollowing(!camera.isFollowing());
     }
+    
 
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
         flashlight = !flashlight;
@@ -279,7 +276,7 @@ int main(int argc, char *argv[]) {
         glCheckError();
 
         glm::mat4 projection;
-        projection = glm::perspective(glm::radians(camera.fov), 1280.0f / 720.0f, 0.1f, 300.0f);
+        projection = glm::perspective(glm::radians(camera.getFOV()), 1280.0f / 720.0f, 0.1f, 300.0f);
         modelShader.setMat4("projection", projection);
 
         glCheckError();

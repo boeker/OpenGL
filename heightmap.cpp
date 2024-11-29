@@ -190,7 +190,7 @@ Mesh HeightMap::generateMesh() {
     return Mesh(vertices, indices, textures);
 }
 
-float HeightMap::getHeight(float x, float y) {
+float HeightMap::getHeight(float x, float y) const {
     if (x < 0 || y < 0 || x > SIZE || y > SIZE) {
         return -std::numeric_limits<float>::infinity();
     }

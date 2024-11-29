@@ -1,4 +1,4 @@
-#ifndef HEIGHTMAP_H 
+#ifndef HEIGHTMAP_H
 #define HEIGHTMAP_H
 
 #include <iostream>
@@ -22,7 +22,7 @@ public:
 
     void generateMap();
     Mesh generateMesh();
-    float getHeight(float x, float y);
+    float getHeight(float x, float y) const;
 };
 
 #endif

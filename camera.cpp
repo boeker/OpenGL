@@ -1,50 +1,24 @@
 #include "camera.h"
 
 Camera::Camera() {
-    attached = false;
-
-    firstPerson = false;
-    distance = 5.0f;
-
     position = glm::vec3(3.0f, 3.0f, 3.0f);
+    pitch = 0.0f;
+    yaw = 90.0f;
     front = glm::vec3(0.0f, 0.0f, -1.0f);
     up = glm::vec3(0.0f, 1.0f, 0.0f);
 
-    pitch = 0.0f;
-    yaw = 90.0f;
-
     fov = 45.0f;
-
-    sensitivity = 0.1f;
     movementSpeed = 5.0f;
+    sensitivity = 0.1f;
+    sprinting = false;
 
-    running = false;
+    following = false;
+    firstPerson = false;
+    distance = 5.0f;
 }
 
-void Camera::attachToPlayer(GameObject *player) {
-    this->player = player;
-    this->attached = true;
-    //firstPerson = true;
-
-    yaw = player->getYaw();
-    pitch = player->getPitch();
-}
-
-void Camera::detachFromPlayer() {
-    this->player = nullptr;
-    this->attached = false;
-}
-
-bool Camera::isAttached() {
-    return attached;
-}
-
-void Camera::attach() {
-    attached = true;
-}
-
-void Camera::detach() {
-    attached = false;
+glm::mat4 Camera::getViewMatrix() const {
+    return glm::lookAt(position, position + front, up);
 }
 
 void Camera::update() {
@@ -55,7 +29,7 @@ void Camera::update() {
     direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     front = glm::normalize(direction);
 
-    if (player && attached) {
+    if (player && following) {
         if (firstPerson) {
             // first person camera
             up = player->getUp();
@@ -70,12 +44,8 @@ void Camera::update() {
     }
 }
 
-glm::mat4 Camera::getViewMatrix() const {
-    return glm::lookAt(position, position + front, up);
-}
-
 void Camera::processMovement(Direction direction, float deltaTime) {
-    const float cameraSpeed = ((running) ? (movementSpeed * 5.0f)
+    const float cameraSpeed = ((sprinting) ? (movementSpeed * 5.0f)
                                          : movementSpeed)* deltaTime;
     glm::vec3 directionVector;
 
@@ -102,7 +72,7 @@ void Camera::processMovement(Direction direction, float deltaTime) {
 
     position += cameraSpeed * directionVector;
 
-    if (player && attached) {
+    if (player && following) {
         if (direction == Direction::UPWARD) {
             player->jump();
         } else {
@@ -127,7 +97,7 @@ void Camera::processDirectionChange(float yawOffset, float pitchOffset) {
         pitch = -89.0f;
     }
 
-    if (player && attached && firstPerson) {
+    if (player && following && firstPerson) {
         player->processDirectionChange(yawOffset * sensitivity, 0.0f);
     }
 }
@@ -142,8 +112,60 @@ void Camera::processFOVChange(float offset) {
     }
 }
 
+float Camera::getFOV() const {
+    return fov;
+}
+
+glm::vec3 Camera::getPosition() const {
+    return position;
+}
+
+void Camera::setSprinting(bool sprinting) {
+    this->sprinting = sprinting;
+}
+
+glm::vec3 Camera::getPlayerPOVPosition() const {
+    if (this->player != nullptr && (!following || !firstPerson)) {
+        return player->getPosition() + 1.5f * front + 3.0f * up;
+
+    } else {
+        return position;
+    }
+}
+
+glm::vec3 Camera::getPlayerPOVFront() const {
+    if (this->player != nullptr && (!following || !firstPerson)) {
+        return player->getFront();
+
+    } else {
+        return front;
+    }
+}
+
+void Camera::attachToPlayer(GameObject *player) {
+    this->player = player;
+    this->following = true;
+    //firstPerson = true;
+
+    yaw = player->getYaw();
+    pitch = player->getPitch();
+}
+
+void Camera::detachFromPlayer() {
+    this->player = nullptr;
+    this->following = false;
+}
+
+bool Camera::isFollowing() {
+    return following;
+}
+
+void Camera::setFollowing(bool following) {
+    this->following = following;
+}
+
 void Camera::adjustDistance(float offset) {
-    if (attached) {
+    if (following) {
         distance += offset;
         if (distance < 1.0f) {
             distance = 1.0f;
@@ -161,28 +183,3 @@ void Camera::adjustDistance(float offset) {
     }
 }
 
-void Camera::setRunning(bool running) {
-    this->running = running;
-}
-
-glm::vec3 Camera::getPosition() const {
-    return position;
-}
-
-glm::vec3 Camera::getPlayerPOVPosition() const {
-    if (this->player != nullptr && (!attached || !firstPerson)) {
-        return player->getPosition() + 1.5f * front + 3.0f * up;
-
-    } else {
-        return position;
-    }
-}
-
-glm::vec3 Camera::getPlayerPOVFront() const {
-    if (this->player != nullptr && (!attached || !firstPerson)) {
-        return player->getFront();
-
-    } else {
-        return front;
-    }
-}
