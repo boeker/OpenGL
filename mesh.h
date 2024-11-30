@@ -40,6 +40,7 @@ public:
                                                            aiTextureType type,
                                                            std::string typeName,
                                                            std::string &directory); 
+    static Mesh cubeMesh();
 };
 
 #endif
