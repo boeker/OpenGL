@@ -33,6 +33,8 @@ bool firstMouse = true;
 Camera camera;
 
 bool flashlight = false;
+bool keyCPressed = false;
+bool keyFPressed = false;
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     std::cout << "framebuffer_size_callback " << width << "x" << height << std::endl;
@@ -95,12 +97,22 @@ void processInput(GLFWwindow *window, GameObject *object) {
     }
 
     if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
-        camera.setFollowing(!camera.isFollowing());
+        if (!keyCPressed) {
+            camera.setFollowing(!camera.isFollowing());
+            keyCPressed = true;
+        }
+    } else {
+        keyCPressed = false;
     }
     
 
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
-        flashlight = !flashlight;
+        if (!keyFPressed) {
+            flashlight = !flashlight;
+            keyFPressed = true;
+        }
+    } else {
+        keyFPressed = false;
     }
 }
 
