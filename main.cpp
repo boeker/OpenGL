@@ -23,8 +23,6 @@
 
 #include "constants.h"
 
-float mixFactor = 0.5f;
-
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
@@ -141,10 +139,10 @@ int main(int argc, char *argv[]) {
     std::cout << "Maximum number of vertex attributes supported: " << nrAttributes << std::endl;
 
     Shader modelShader("shaders/model.vs", "shaders/model.fs");
-    Shader lightShader("shaders/light.vs", "shaders/light.fs");
     Shader lightMapsShader("shaders/lightmaps.vs", "shaders/lightmaps.fs");
     Shader lightsourceShader("shaders/light.vs", "shaders/lightsource.fs");
     Shader flashlightShader("shaders/flashlight.vs", "shaders/flashlight.fs");
+    Shader lightShader("shaders/materialLighting.vs", "shaders/materialLighting.fs");
     Shader lightingShader("shaders/lighting.vs", "shaders/lighting.fs");
 
     // generate height map and create model from it
@@ -253,7 +251,6 @@ int main(int argc, char *argv[]) {
         lightShader.use();
 
         // position of light
-        lightShader.setVec3v("light.position", viewSpaceLightPos);
 
         glm::vec3 ambientColor = lightColor * glm::vec3(0.1f); 
         glm::vec3 diffuseColor = lightColor * glm::vec3(0.8f); 
@@ -264,13 +261,44 @@ int main(int argc, char *argv[]) {
         float attenuationConstant = 1.0f;
         float attenuationLinear = 0.014f;
         float attenuationQuadratic = 0.0007f;
+        // position of light
 
-        lightShader.setVec3v("light.ambient", ambientColor);
-        lightShader.setVec3v("light.diffuse", diffuseColor);
-        lightShader.setVec3v("light.specular", specularColor);
-        lightShader.setFloat("light.constant", attenuationConstant);
-        lightShader.setFloat("light.linear", attenuationLinear);
-        lightShader.setFloat("light.quadratic", attenuationQuadratic);	
+        glm::vec3 viewSpacePlayerPosition(camera.getViewMatrix() * glm::vec4(camera.getPlayerPOVPosition(), 1.0f));
+        glm::mat3 normalMatrix(glm::transpose(glm::inverse(camera.getViewMatrix())));
+        glm::vec3 viewSpacePlayerFront(normalMatrix * camera.getPlayerPOVFront());
+
+        glm::vec3 direction(-2.0f, -1.0f, -0.0f);
+        glm::vec3 viewSpaceDirection(normalMatrix * direction);
+
+        lightShader.setVec3v("directionalLight.direction", viewSpaceDirection);
+        lightShader.setVec3v("directionalLight.ambient", 0.2f * ambientColor);
+        lightShader.setVec3v("directionalLight.diffuse", 0.2f * diffuseColor);
+        lightShader.setVec3v("directionalLight.specular", 0.2f * specularColor);
+
+        lightShader.setVec3v("pointLights[0].position", viewSpaceLightPos);
+        lightShader.setVec3v("pointLights[0].ambient", ambientColor);
+        lightShader.setVec3v("pointLights[0].diffuse", diffuseColor);
+        lightShader.setVec3v("pointLights[0].specular", specularColor);
+        lightShader.setFloat("pointLights[0].constant", attenuationConstant);
+        lightShader.setFloat("pointLights[0].linear", attenuationLinear);
+        lightShader.setFloat("pointLights[0].quadratic", attenuationQuadratic);	
+
+        lightShader.setVec3v("spotLight.position", viewSpacePlayerPosition);
+        lightShader.setVec3v("spotLight.direction", viewSpacePlayerFront);
+        lightShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+        lightShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+        if (flashlight) {
+            lightShader.setFloat("spotLight.enabled", 1.0f);
+        } else {
+            lightShader.setFloat("spotLight.enabled", 0.0f);
+        }
+        lightShader.setVec3v("spotLight.ambient", ambientColor);
+        lightShader.setVec3v("spotLight.diffuse", diffuseColor);
+        lightShader.setVec3v("spotLight.specular", specularColor);
+        lightShader.setFloat("spotLight.constant", attenuationConstant);
+        lightShader.setFloat("spotLight.linear", attenuationLinear);
+        lightShader.setFloat("spotLight.quadratic", attenuationQuadratic);	
+
 
         // materials of lit object
         lightShader.setVec3("material.ambient", 0.0f, 1.0f, 0.6f);
@@ -292,14 +320,6 @@ int main(int argc, char *argv[]) {
         lightingShader.use();
         glCheckError();
 
-        // position of light
-
-        glm::vec3 viewSpacePlayerPosition(camera.getViewMatrix() * glm::vec4(camera.getPlayerPOVPosition(), 1.0f));
-        glm::mat3 normalMatrix(glm::transpose(glm::inverse(camera.getViewMatrix())));
-        glm::vec3 viewSpacePlayerFront(normalMatrix * camera.getPlayerPOVFront());
-
-        glm::vec3 direction(-2.0f, -1.0f, -0.0f);
-        glm::vec3 viewSpaceDirection(normalMatrix * direction);
         lightingShader.setVec3v("directionalLight.direction", viewSpaceDirection);
         lightingShader.setVec3v("directionalLight.ambient", 0.2f * ambientColor);
         lightingShader.setVec3v("directionalLight.diffuse", 0.2f * diffuseColor);
