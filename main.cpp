@@ -172,7 +172,9 @@ int main(int argc, char *argv[]) {
     Game game(&heightMap);
 
     Model mapModel(heightMap.generateMesh());
-    GameObject mapObject(&mapModel, &game);
+    GameObject mapObject(&mapModel);
+    mapObject.setGravity(false);
+    game.addGameObject(&mapObject);
 
     // Load backpack model and use it as player object
     modelShader.use();
@@ -184,12 +186,13 @@ int main(int argc, char *argv[]) {
     Model crateModel(Mesh::cubeMesh());
 
     // player
-    GameObject playerObject(&backpack, &game);
+    GameObject playerObject(&backpack);
     playerObject.setHeightOffset(1.7f);
     playerObject.setYawOffset(90.0f);
     playerObject.setPosition(glm::vec3(0.0f, 10.0f, 0.0f));
     playerObject.setDirection(45.0f, 0.0f);
     camera.attachToPlayer(&playerObject);
+    game.addGameObject(&playerObject);
 
     glm::vec3 cubePositions[] = {
         glm::vec3( 0.0f,  0.0f,  0.0f), 
@@ -217,7 +220,7 @@ int main(int argc, char *argv[]) {
 
         // process input
         processInput(window, &playerObject);
-        playerObject.simulateGravity(deltaTime);
+        game.simulateGravity(deltaTime);
 
         glCheckError();
 
@@ -288,8 +291,8 @@ int main(int argc, char *argv[]) {
         // set material properties
         lightShader.setVec3("material.ambient", 0.0f, 1.0f, 0.6f);
         lightShader.setVec3("material.diffuse", 0.0f, 1.0f, 1.0);
-        lightShader.setVec3("material.specular", 0.5, 0.5, 0.5);
-        lightShader.setFloat("material.shininess", 32.0f);
+    lightShader.setVec3("material.specular", 0.5, 0.5, 0.5);
+    lightShader.setFloat("material.shininess", 32.0f);
 
         // set transformations
         lightShader.setMat4("view", viewMatrix);
@@ -340,8 +343,7 @@ int main(int argc, char *argv[]) {
         }
 
         // draw game objects using lighting shader
-        playerObject.draw(lightingShader);
-        mapObject.draw(lightingShader);
+        game.draw(lightingShader);
 
 
         glCheckError();
@@ -380,9 +382,9 @@ void setUpLightingShader(Shader &shader,
 
     // directional light
     shader.setVec3v("directionalLight.direction", vsLightDirection);
-    shader.setVec3v("directionalLight.ambient", 0.2f * ambientWhite);
-    shader.setVec3v("directionalLight.diffuse", 0.2f * diffuseWhite);
-    shader.setVec3v("directionalLight.specular", 0.2f * specularWhite);
+    shader.setVec3v("directionalLight.ambient", 0.1f * ambientWhite);
+    shader.setVec3v("directionalLight.diffuse", 0.1f * diffuseWhite);
+    shader.setVec3v("directionalLight.specular", 0.1f * specularWhite);
 
     glCheckError();
 

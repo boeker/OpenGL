@@ -10,7 +10,7 @@ void GameObject::updateFront() {
     front = glm::normalize(direction);
 }
 
-GameObject::GameObject(Model *model, Game *game) {
+GameObject::GameObject(Model *model) {
     position = glm::vec3(0.0f, 0.0f, 0.0f);
     yaw = 0.0f;
     pitch = 0.0f;
@@ -18,13 +18,12 @@ GameObject::GameObject(Model *model, Game *game) {
     up = glm::vec3(0.0f, 1.0f, 0.0f);
 
     velocity = 0.0f;
+    gravity = true;
     falling = true;
 
     this->model = model;
     heightOffset = 0.0f;
     yawOffset = 0.0f;
-
-    this->game = game;
 }
 
 glm::vec3 GameObject::getPosition() const {
@@ -59,6 +58,10 @@ void GameObject::setYawOffset(const float offset) {
     yawOffset = offset;
 }
 
+void GameObject::setGravity(bool gravity) {
+    this->gravity = gravity;
+}
+
 void GameObject::processDirectionChange(float yawOffset, float pitchOffset) {
     yaw += yawOffset;
     pitch += pitchOffset;
@@ -84,28 +87,27 @@ void GameObject::jump() {
     }
 }
 
-void GameObject::simulateGravity(float deltaTime) {
-    float currentHeight = game->map->getHeight(position.x, position.z);
+void GameObject::simulateGravity(float deltaTime, float mapHeight) {
+    if (gravity) {
+        if (position.y > mapHeight && !falling) {
+            falling = true;
+            velocity = 0.0f;
+        }
 
-    if (position.y > currentHeight && !falling) {
-        falling = true;
-        velocity = 0.0f;
+        if (falling) {
+            float newVelocity = velocity + GRAVITY * deltaTime;
+            float displacement = deltaTime * (velocity + newVelocity) / 2.0f;
+            position.y -= displacement;
+
+            velocity = newVelocity;
+        }
+
+        if (position.y < mapHeight) {
+            falling = false;
+            velocity = 0.0f;
+            position.y = mapHeight;
+        }
     }
-
-    if (falling) {
-        float newVelocity = velocity + GRAVITY * deltaTime;
-        float displacement = deltaTime * (velocity + newVelocity) / 2.0f;
-        position.y -= displacement;
-
-        velocity = newVelocity;
-    }
-
-    if (position.y < currentHeight) {
-        falling = false;
-        velocity = 0.0f;
-        position.y = currentHeight;
-    }
-
 }
 
 

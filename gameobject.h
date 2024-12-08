@@ -23,6 +23,8 @@ private:
     // current movement velocity
     float velocity;
 
+    // is this object affected by gravity?
+    bool gravity;
     // is the object in mid-air?
     bool falling;
 
@@ -32,14 +34,11 @@ private:
     float heightOffset;
     float yawOffset;
 
-    // game this object is associated with
-    Game *game;
-
     // compute new front vector from yaw and pitch
     void updateFront();
 
 public:
-    GameObject(Model *model, Game *game);
+    GameObject(Model *model);
 
     // getters and setters
     glm::vec3 getPosition() const;
@@ -50,6 +49,7 @@ public:
     void setPosition(const glm::vec3 &position);
     void setHeightOffset(const float offset);
     void setYawOffset(const float offset);
+    void setGravity(bool gravity);
 
     // process (change of) yaw and pitch and update front vector
     void processDirectionChange(float yawOffset, float pitchOffset);
@@ -62,7 +62,7 @@ public:
     void jump();
 
     // compute new position after deltaTime
-    void simulateGravity(float deltaTime);
+    void simulateGravity(float deltaTime, float mapHeight);
 
     // draw model of this object
     void draw(Shader &shader);
