@@ -2,10 +2,9 @@
 #define HEIGHTMAP_H
 
 #include <iostream>
+#include <glm/glm.hpp>
 
 #include "mesh.h"
-
-#include "glm/glm.hpp"
 
 class HeightMap {
 private:

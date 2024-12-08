@@ -1,6 +1,6 @@
 #include "heightmap.h"
 
-#include "glm/gtx/string_cast.hpp"
+#include <glm/gtx/string_cast.hpp>
 
 HeightMap::HeightMap() {
     heightMap = new float*[SIZE];

@@ -1,10 +1,11 @@
 #ifndef MODEL_H
 #define MODEL_H
 
+#include <assimp/scene.h>
+
 #include "mesh.h"
 #include "shader.h"
 #include "texture.h"
-#include <assimp/scene.h>
 
 class Model {
 private:

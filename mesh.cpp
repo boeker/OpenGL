@@ -1,6 +1,6 @@
 #include "mesh.h"
 
-#include "stb_image.h"
+#include <stb_image.h>
 
 std::vector<Texture> loadedTextures;
 

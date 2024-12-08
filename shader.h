@@ -1,14 +1,15 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include "glad/glad.h"
-#include "glm/glm.hpp"
-#include "glm/gtc/type_ptr.hpp"
-
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
+
+#include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 
 class Shader {
 private:

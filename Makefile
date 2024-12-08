@@ -1,4 +1,4 @@
-CXXFLAGS = -g -Wall -lglfw -lassimp
+CXXFLAGS = -g -Wall -lglfw -lassimp -Iinclude
 CXX = g++
 
 CXXSOURCES = main.cpp\
@@ -25,7 +25,6 @@ HEADERS = camera.h\
 	mesh.h\
 	model.h\
 	shader.h\
-	stb_image.h\
 	texture.h
 
 OBJECTS = $(CXXSOURCES:.cpp=.o) $(CSOURCES:.c=.o)

@@ -1,10 +1,11 @@
 #include "model.h"
 
-#include "glad/glad.h"
-#include "glm/glm.hpp"
+#include <queue>
+
+#include <glad/glad.h>
+#include <glm/glm.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
-#include <queue>
 
 void Model::processScene(const aiScene *scene, std::string &directory) {
     std::queue<aiNode*> nodes;

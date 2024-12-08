@@ -3,7 +3,8 @@
 
 #include <string>
 #include <vector>
-#include "glm/glm.hpp"
+
+#include <glm/glm.hpp>
 #include <assimp/scene.h>
 
 #include "shader.h"
