@@ -1,48 +1,34 @@
-CXXFLAGS = -g -Wall -lglfw -lassimp -Iinclude
-CXX = g++
+SRC_DIR := src
+OBJ_DIR := obj
+BIN_DIR := .
 
-CXXSOURCES = main.cpp\
-	camera.cpp\
-	constants.cpp\
-	gameobject.cpp\
-	game.cpp\
-	gl.cpp\
-	heightmap.cpp\
-	mesh.cpp\
-	model.cpp\
-	shader.cpp\
-	stb_image.cpp\
-	texture.cpp
+EXE := $(BIN_DIR)/opengl
+SRC := $(wildcard $(SRC_DIR)/*.cpp)
+OBJ := $(SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
-CSOURCES = glad.c
+CXX := g++
+CPPFLAGS := -Iinclude -MMD -MP
+CXXFLAGS := -g -Wall
+LDFLAGS :=
+LDLIBS := -lglfw -lassimp 
 
-HEADERS = camera.h\
-	constants.h\
-	gameobject.h\
-	game.h\
-	gl.h\
-	heightmap.h\
-	mesh.h\
-	model.h\
-	shader.h\
-	texture.h
+#$(info	Objects files: $(OBJ))
 
-OBJECTS = $(CXXSOURCES:.cpp=.o) $(CSOURCES:.c=.o)
+.PHONY: all clean
 
-#$(info	Objects files: $(OBJECTS))
+all: $(EXE)
 
-all: main
+$(EXE): $(OBJ) | $(BIN_DIR)
+	$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
-main: $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
-$(CXXSOURCES:.cpp=.o): %.o: %.cpp $(HEADERS)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+$(BIN_DIR) $(OBJ_DIR):
+	mkdir -p $@
 
-$(CSOURCES:.c=.o): %.o: %.c $(HEADERS)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-.PHONY: clean
 clean:
-	-@rm main $(OBJECTS) 2>/dev/null || true
+	@$(RM) -rv $(EXE) $(BIN_DIR) $(OBJ_DIR) 2>/dev/null || true
+
+-include $(OBJ:.o=.d)
 
