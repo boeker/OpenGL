@@ -69,7 +69,7 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
     camera.adjustDistance(-0.5f * (float)yoffset);
 }
 
-void processInput(GLFWwindow *window, GameObject *object) {
+void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
@@ -159,83 +159,7 @@ int main(int argc, char *argv[]) {
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
     std::cout << "Maximum number of vertex attributes supported: " << nrAttributes << std::endl;
 
-    Shader modelShader("shaders/model.vs", "shaders/model.fs");
-    Shader lightMapsShader("shaders/lightmaps.vs", "shaders/lightmaps.fs");
-    Shader lightsourceShader("shaders/light.vs", "shaders/lightsource.fs");
-    Shader flashlightShader("shaders/flashlight.vs", "shaders/flashlight.fs");
-    Shader lightShader("shaders/materialLighting.vs", "shaders/materialLighting.fs");
-    Shader lightingShader("shaders/lighting.vs", "shaders/lighting.fs");
-    Shader borderShader("shaders/materialLighting.vs", "shaders/border.fs");
-
-    Game game(&lightingShader);
-
-    // Load backpack model and use it as player object
-    modelShader.use();
-    Model backpack;
-    backpack.loadModel("models/backpack/backpack.obj");
-
-    Texture wall = Texture::createTextureFromFile("textures/wall.jpg", "texture_diffuse");
-
-    Model crateModel(Mesh::cubeMesh());
-
-    // player
-    GameObject playerObject(&backpack);
-    playerObject.setShader(&lightingShader);
-    playerObject.setBorderShader(&borderShader);
-    playerObject.setDrawBorder(false);
-    playerObject.setHeightOffset(1.7f);
-    playerObject.setYawOffset(90.0f);
-    playerObject.setPosition(glm::vec3(0.0f, 10.0f, 0.0f));
-    playerObject.setDirection(45.0f, 0.0f);
-    camera.attachToPlayer(&playerObject);
-    game.addGameObject(&playerObject);
-
-    // material cube on top of mountain
-    GameObject materialCube(&crateModel);
-    materialCube.setShader(&lightShader);
-    materialCube.setBorderShader(&borderShader);
-    materialCube.setPosition(glm::vec3(99.0f, 50.5f, 99.0f));
-    materialCube.setHeightOffset(0.5f);
-    materialCube.setDrawBorder(true);
-    game.addGameObject(&materialCube);
-
-    // crate on top of mountain
-    GameObject crate(&crateModel);
-    crate.setShader(&lightingShader);
-    crate.setBorderShader(&borderShader);
-    crate.setPosition(glm::vec3(101.0f, 42.0f, 101.0f));
-    crate.setHeightOffset(0.5f);
-    crate.setDrawBorder(true);
-    game.addGameObject(&crate);
-
-    glm::vec3 cubePositions[] = {
-        glm::vec3( 0.0f,  0.0f,  0.0f), 
-        glm::vec3( 2.0f,  5.0f, -15.0f), 
-        glm::vec3(-1.5f, -2.2f, -2.5f),  
-        glm::vec3(-3.8f, -2.0f, -12.3f),  
-        glm::vec3( 2.4f, -0.4f, -3.5f),  
-        glm::vec3(-1.7f,  3.0f, -7.5f),  
-        glm::vec3( 1.3f, -2.0f, -2.5f),  
-        glm::vec3( 1.5f,  2.0f, -2.5f), 
-        glm::vec3( 1.5f,  0.2f, -1.5f), 
-        glm::vec3(-2.8f,  3.0f,  7.5f)  
-    };
-    std::vector<GameObject*> rotatingCrates;
-    for (unsigned int i = 0; i < 10; ++i) {
-        GameObject *rotatingCrate = new GameObject(&crateModel);
-        rotatingCrate->setShader(&lightingShader);
-        rotatingCrate->setBorderShader(&borderShader);
-        rotatingCrate->setPosition(glm::vec3(102.0f, 41.0f, 102.0f) + cubePositions[i]);
-        rotatingCrate->setHeightOffset(0.5f);
-        rotatingCrate->setGravity(false);
-        rotatingCrate->setDrawBorder(true);
-
-        float angle = 20.0f * i + 50.0f * (float)glfwGetTime();
-        rotatingCrate->setDirection(angle, angle);
-
-        game.addGameObject(rotatingCrate);
-        rotatingCrates.push_back(rotatingCrate);
-    }
+    Game game(camera);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_STENCIL_TEST);
@@ -250,7 +174,7 @@ int main(int argc, char *argv[]) {
         lastFrame = currentFrame;
 
         // process input
-        processInput(window, &playerObject);
+        processInput(window);
         game.simulateGravity(deltaTime);
 
         glCheckError();
@@ -306,62 +230,58 @@ int main(int argc, char *argv[]) {
         modelMatrix = glm::translate(modelMatrix, lightPosition);
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.2f));
     
-        lightsourceShader.use();
-        lightsourceShader.setVec3v("lightSourceColor", redLight);
-        lightsourceShader.setMat4("view", viewMatrix);
-        lightsourceShader.setMat4("projection", projectionMatrix);
-        lightsourceShader.setMat4("model", modelMatrix);
+        game.lightsourceShader.use();
+        game.lightsourceShader.setVec3v("lightSourceColor", redLight);
+        game.lightsourceShader.setMat4("view", viewMatrix);
+        game.lightsourceShader.setMat4("projection", projectionMatrix);
+        game.lightsourceShader.setMat4("model", modelMatrix);
 
-        crateModel.draw(lightsourceShader);
+        //crateModel.draw(game.lightsourceShader);
 
         //**********************************************************************
         // lighting shader (material)
         //**********************************************************************
 
-        lightShader.use();
-        setUpLightingShader(lightShader, vsLightDirection, vsLightPosition, vsPlayerPosition, vsPlayerFront);
+        game.lightShader.use();
+        setUpLightingShader(game.lightShader, vsLightDirection, vsLightPosition, vsPlayerPosition, vsPlayerFront);
 
         // set material properties
-        lightShader.setVec3("material.ambient", 0.0f, 1.0f, 0.6f);
-        lightShader.setVec3("material.diffuse", 0.0f, 1.0f, 1.0);
-        lightShader.setVec3("material.specular", 0.5, 0.5, 0.5);
-        lightShader.setFloat("material.shininess", 32.0f);
+        game.lightShader.setVec3("material.ambient", 0.0f, 1.0f, 0.6f);
+        game.lightShader.setVec3("material.diffuse", 0.0f, 1.0f, 1.0);
+        game.lightShader.setVec3("material.specular", 0.5, 0.5, 0.5);
+        game.lightShader.setFloat("material.shininess", 32.0f);
 
         // set transformations
-        lightShader.setMat4("view", viewMatrix);
-        lightShader.setMat4("projection", projectionMatrix);
+        game.lightShader.setMat4("view", viewMatrix);
+        game.lightShader.setMat4("projection", projectionMatrix);
 
         glCheckError();
 
         //**********************************************************************
         // lighting shader
         //**********************************************************************
-        lightingShader.use();
-        setUpLightingShader(lightingShader, vsLightDirection, vsLightPosition, vsPlayerPosition, vsPlayerFront);
+        game.lightingShader.use();
+        setUpLightingShader(game.lightingShader, vsLightDirection, vsLightPosition, vsPlayerPosition, vsPlayerFront);
 
         // set material properties
-        lightingShader.setVec3("material.specular", 0.5, 0.5, 0.5);
-        lightingShader.setFloat("material.shininess", 32.0f);
+        game.lightingShader.setVec3("material.specular", 0.5, 0.5, 0.5);
+        game.lightingShader.setFloat("material.shininess", 32.0f);
 
         // set transformations
-        lightingShader.setMat4("view", camera.getViewMatrix());
-        lightingShader.setMat4("projection", projectionMatrix);
+        game.lightingShader.setMat4("view", camera.getViewMatrix());
+        game.lightingShader.setMat4("projection", projectionMatrix);
 
-        // draw rotating crates using lighting shader
-        for (unsigned int i = 0; i < 10; ++i) {
-            float angle = 20.0f * i + 50.0f * (float)glfwGetTime();
-            rotatingCrates[i]->setDirection(angle, angle);
-        }
+        game.processGameLogic((float)glfwGetTime(), lightPosition);
 
         glCheckError();
 
-        borderShader.use();
-        borderShader.setMat4("view", camera.getViewMatrix());
-        borderShader.setMat4("projection", projectionMatrix);
+        game.borderShader.use();
+        game.borderShader.setMat4("view", camera.getViewMatrix());
+        game.borderShader.setMat4("projection", projectionMatrix);
     
         glCheckError();
 
-        lightingShader.use();
+        game.lightingShader.use();
         // draw game objects using lighting shader
         //game.draw(lightingShader, borderShader);
         game.draw();

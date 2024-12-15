@@ -30,6 +30,7 @@ private:
 
     // associated model
     Model *model;
+    float scale;
 
     // shaders
     Shader *shader;
@@ -56,6 +57,7 @@ public:
     void setHeightOffset(const float offset);
     void setYawOffset(const float offset);
     void setGravity(bool gravity);
+    void setScale(float scale);
 
     // process (change of) yaw and pitch and update front vector
     void processDirectionChange(float yawOffset, float pitchOffset);

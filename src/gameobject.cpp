@@ -22,6 +22,7 @@ GameObject::GameObject(Model *model) {
     falling = true;
 
     this->model = model;
+    this->scale = 1.0f;
     heightOffset = 0.0f;
     yawOffset = 0.0f;
 
@@ -64,6 +65,10 @@ void GameObject::setYawOffset(const float offset) {
 
 void GameObject::setGravity(bool gravity) {
     this->gravity = gravity;
+}
+
+void GameObject::setScale(float scale) {
+    this->scale = scale;
 }
 
 void GameObject::processDirectionChange(float yawOffset, float pitchOffset) {
@@ -121,6 +126,7 @@ void GameObject::draw(Shader &shader) {
     model = glm::translate(model, glm::vec3(0.0f, heightOffset, 0.0f));
     model = glm::rotate(model, glm::radians(yaw + yawOffset), glm::vec3(0.0f, -1.0f, 0.0f));
     model = glm::rotate(model, glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::scale(model, glm::vec3(scale));
     shader.setMat4("model", model);
 
     this->model->draw(shader);
@@ -133,6 +139,7 @@ void GameObject::drawBorderObject(Shader &shader) {
         model = glm::translate(model, glm::vec3(0.0f, heightOffset, 0.0f));
         model = glm::rotate(model, glm::radians(yaw + yawOffset), glm::vec3(0.0f, -1.0f, 0.0f));
         model = glm::rotate(model, glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(scale));
         model = glm::scale(model, glm::vec3(1.1f));
         shader.setMat4("model", model);
 
