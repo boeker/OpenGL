@@ -24,6 +24,10 @@ GameObject::GameObject(Model *model) {
     this->model = model;
     heightOffset = 0.0f;
     yawOffset = 0.0f;
+
+    shader = nullptr;
+    borderShader = nullptr;
+    drawBorder = false;
 }
 
 glm::vec3 GameObject::getPosition() const {
@@ -120,4 +124,52 @@ void GameObject::draw(Shader &shader) {
     shader.setMat4("model", model);
 
     this->model->draw(shader);
+}
+
+void GameObject::drawBorderObject(Shader &shader) {
+    if (drawBorder) {
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, position);
+        model = glm::translate(model, glm::vec3(0.0f, heightOffset, 0.0f));
+        model = glm::rotate(model, glm::radians(yaw + yawOffset), glm::vec3(0.0f, -1.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(pitch), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(1.1f));
+        shader.setMat4("model", model);
+
+        this->model->draw(shader);
+    }
+}
+
+void GameObject::setShader(Shader *shader) {
+    this->shader = shader;
+}
+
+void GameObject::setBorderShader(Shader *shader) {
+    this->borderShader = shader;
+}
+
+Shader* GameObject::getShader() {
+    return shader;
+}
+
+Shader* GameObject::getBorderShader() {
+    return borderShader;
+}
+
+void GameObject::setDrawBorder(bool drawBorder) {
+    this->drawBorder = drawBorder;
+}
+
+void GameObject::draw() {
+    if (shader) {
+        shader->use();
+        draw(*shader);
+    }
+}
+
+void GameObject::drawBorderObject() {
+    if (borderShader) {
+        borderShader->use();
+        drawBorderObject(*borderShader);
+    }
 }

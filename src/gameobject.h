@@ -30,6 +30,12 @@ private:
 
     // associated model
     Model *model;
+
+    // shaders
+    Shader *shader;
+    Shader *borderShader;
+    bool drawBorder;
+
     // position model relative to the following offsets
     float heightOffset;
     float yawOffset;
@@ -66,6 +72,15 @@ public:
 
     // draw model of this object
     void draw(Shader &shader);
+    void drawBorderObject(Shader &shader);
+
+    void setShader(Shader *shader);
+    void setBorderShader(Shader *shader);
+    void setDrawBorder(bool drawBorder);
+    Shader* getShader();
+    Shader* getBorderShader();
+    void draw();
+    void drawBorderObject();
 };
 
 #endif

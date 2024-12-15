@@ -165,16 +165,9 @@ int main(int argc, char *argv[]) {
     Shader flashlightShader("shaders/flashlight.vs", "shaders/flashlight.fs");
     Shader lightShader("shaders/materialLighting.vs", "shaders/materialLighting.fs");
     Shader lightingShader("shaders/lighting.vs", "shaders/lighting.fs");
+    Shader borderShader("shaders/materialLighting.vs", "shaders/border.fs");
 
-    // generate height map and create model from it
-    HeightMap heightMap;
-    heightMap.generateMap();
-    Game game(&heightMap);
-
-    Model mapModel(heightMap.generateMesh());
-    GameObject mapObject(&mapModel);
-    mapObject.setGravity(false);
-    game.addGameObject(&mapObject);
+    Game game(&lightingShader);
 
     // Load backpack model and use it as player object
     modelShader.use();
@@ -187,12 +180,33 @@ int main(int argc, char *argv[]) {
 
     // player
     GameObject playerObject(&backpack);
+    playerObject.setShader(&lightingShader);
+    playerObject.setBorderShader(&borderShader);
+    playerObject.setDrawBorder(false);
     playerObject.setHeightOffset(1.7f);
     playerObject.setYawOffset(90.0f);
     playerObject.setPosition(glm::vec3(0.0f, 10.0f, 0.0f));
     playerObject.setDirection(45.0f, 0.0f);
     camera.attachToPlayer(&playerObject);
     game.addGameObject(&playerObject);
+
+    // material cube on top of mountain
+    GameObject materialCube(&crateModel);
+    materialCube.setShader(&lightShader);
+    materialCube.setBorderShader(&borderShader);
+    materialCube.setPosition(glm::vec3(99.0f, 50.5f, 99.0f));
+    materialCube.setHeightOffset(0.5f);
+    materialCube.setDrawBorder(true);
+    game.addGameObject(&materialCube);
+
+    // crate on top of mountain
+    GameObject crate(&crateModel);
+    crate.setShader(&lightingShader);
+    crate.setBorderShader(&borderShader);
+    crate.setPosition(glm::vec3(101.0f, 42.0f, 101.0f));
+    crate.setHeightOffset(0.5f);
+    crate.setDrawBorder(true);
+    game.addGameObject(&crate);
 
     glm::vec3 cubePositions[] = {
         glm::vec3( 0.0f,  0.0f,  0.0f), 
@@ -206,9 +220,26 @@ int main(int argc, char *argv[]) {
         glm::vec3( 1.5f,  0.2f, -1.5f), 
         glm::vec3(-2.8f,  3.0f,  7.5f)  
     };
+    std::vector<GameObject*> rotatingCrates;
+    for (unsigned int i = 0; i < 10; ++i) {
+        GameObject *rotatingCrate = new GameObject(&crateModel);
+        rotatingCrate->setShader(&lightingShader);
+        rotatingCrate->setBorderShader(&borderShader);
+        rotatingCrate->setPosition(glm::vec3(102.0f, 41.0f, 102.0f) + cubePositions[i]);
+        rotatingCrate->setHeightOffset(0.5f);
+        rotatingCrate->setGravity(false);
+        rotatingCrate->setDrawBorder(true);
+
+        float angle = 20.0f * i + 50.0f * (float)glfwGetTime();
+        rotatingCrate->setDirection(angle, angle);
+
+        game.addGameObject(rotatingCrate);
+        rotatingCrates.push_back(rotatingCrate);
+    }
 
     glEnable(GL_DEPTH_TEST);
-    
+    glEnable(GL_STENCIL_TEST);
+
     // wireframe mode
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -226,7 +257,9 @@ int main(int argc, char *argv[]) {
 
         // rendering
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // state-setting function
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // state-using function
+        glStencilMask(0xFF); // Enable writing to stencil buffer
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); // state-using function
+        glStencilMask(0x00); // Disable writing to stencil buffer
 
         glCheckError();
 
@@ -291,19 +324,12 @@ int main(int argc, char *argv[]) {
         // set material properties
         lightShader.setVec3("material.ambient", 0.0f, 1.0f, 0.6f);
         lightShader.setVec3("material.diffuse", 0.0f, 1.0f, 1.0);
-    lightShader.setVec3("material.specular", 0.5, 0.5, 0.5);
-    lightShader.setFloat("material.shininess", 32.0f);
+        lightShader.setVec3("material.specular", 0.5, 0.5, 0.5);
+        lightShader.setFloat("material.shininess", 32.0f);
 
         // set transformations
         lightShader.setMat4("view", viewMatrix);
         lightShader.setMat4("projection", projectionMatrix);
-        // position cube on top of mountain
-        modelMatrix = glm::mat4(1.0f);
-        modelMatrix = glm::translate(modelMatrix, glm::vec3(99.0f, 38.5f, 99.0f));
-        lightShader.setMat4("model", modelMatrix);
-
-        // draw using lighting shader (material)
-        crateModel.draw(lightShader);
 
         glCheckError();
 
@@ -320,31 +346,25 @@ int main(int argc, char *argv[]) {
         // set transformations
         lightingShader.setMat4("view", camera.getViewMatrix());
         lightingShader.setMat4("projection", projectionMatrix);
-        // position crate on top of mountain
-        modelMatrix = glm::mat4(1.0f);
-        modelMatrix = glm::translate(modelMatrix, glm::vec3(100.0f, 42.0f, 100.0f));
-        lightingShader.setMat4("model", modelMatrix);
-
-        // draw crate using lighting shader
-        crateModel.draw(lightingShader);
 
         // draw rotating crates using lighting shader
         for (unsigned int i = 0; i < 10; ++i) {
-            glm::mat4 modelMatrix = glm::mat4(1.0f);
-            modelMatrix = glm::translate(modelMatrix, cubePositions[i]);
-            modelMatrix = glm::translate(modelMatrix, glm::vec3(102.0f, 41.0f, 102.0f));
             float angle = 20.0f * i + 50.0f * (float)glfwGetTime();
-            modelMatrix = glm::rotate(modelMatrix, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-
-            lightingShader.setMat4("model", modelMatrix);
-
-            crateModel.draw(lightingShader);
-
+            rotatingCrates[i]->setDirection(angle, angle);
         }
 
-        // draw game objects using lighting shader
-        game.draw(lightingShader);
+        glCheckError();
 
+        borderShader.use();
+        borderShader.setMat4("view", camera.getViewMatrix());
+        borderShader.setMat4("projection", projectionMatrix);
+    
+        glCheckError();
+
+        lightingShader.use();
+        // draw game objects using lighting shader
+        //game.draw(lightingShader, borderShader);
+        game.draw();
 
         glCheckError();
 
