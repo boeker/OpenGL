@@ -1,10 +1,16 @@
 #include "game.h"
 
-Game::Game(Camera &camera)
+#include "gl.h"
+
+Game::Game(Camera *camera)
     : lightsourceShader("shaders/light.vs", "shaders/lightsource.fs"),
       lightShader("shaders/materialLighting.vs", "shaders/materialLighting.fs"),
       lightingShader("shaders/lighting.vs", "shaders/lighting.fs"),
-      borderShader("shaders/materialLighting.vs", "shaders/border.fs") {
+      borderShader("shaders/materialLighting.vs", "shaders/border.fs"),
+      whiteLight(1.0f, 1.0f, 1.0f),
+      redLight(1.0f, 0.0f, 0.0f) {
+    this->camera = camera;
+    this->flashlight = false;
 
     // generate height map and create model from it
     heightMap.generateMap();
@@ -31,7 +37,7 @@ Game::Game(Camera &camera)
     playerObject->setYawOffset(90.0f);
     playerObject->setPosition(glm::vec3(0.0f, 10.0f, 0.0f));
     playerObject->setDirection(45.0f, 0.0f);
-    camera.attachToPlayer(playerObject);
+    this->camera->attachToPlayer(playerObject);
     addGameObject(playerObject);
 
     // material cube on top of mountain
@@ -80,12 +86,12 @@ Game::Game(Camera &camera)
         rotatingCrates.push_back(rotatingCrate);
     }
 
-    // light source object
+    // cube representing point light
     lightSourceObject = new GameObject(crateModel);
     lightSourceObject->setShader(&lightsourceShader);
     lightSourceObject->setBorderShader(&borderShader);
     lightSourceObject->setHeightOffset(0.5f);
-    lightSourceObject->setDrawBorder(true);
+    lightSourceObject->setDrawBorder(false);
     lightSourceObject->setGravity(false);
     lightSourceObject->setScale(0.2f);
     addGameObject(lightSourceObject);
@@ -139,13 +145,162 @@ void Game::draw() {
     glEnable(GL_DEPTH_TEST); // Re-enable depth test
 }
 
-void Game::processGameLogic(float time, const glm::vec3 &lightPosition) {
+void Game::processGameLogic(float time) {
     // rotate crates
     for (unsigned int i = 0; i < 10; ++i) {
         float angle = 20.0f * i + 50.0f * time;
         rotatingCrates[i]->setDirection(angle, angle);
     }
 
+    //**********************************************************************
+    // (view space) light positions
+    //**********************************************************************
+
+    // determine position of point light
+    float angle = 20.0f * time;
+    glm::mat4 matrix = glm::mat4(1.0f);
+    matrix = glm::translate(matrix, glm::vec3(100.0f, 40.0f, 100.0f));
+    matrix = glm::rotate(matrix, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
+
+    lightPosition = matrix * glm::vec4(75.0f, 1.0f, 0.0f, 1.0f); 
+
     // position light
     lightSourceObject->setPosition(lightPosition);
+}
+
+void Game::setUpShaders() {
+    //**********************************************************************
+    // matrices
+    //**********************************************************************
+
+    // projection matrix
+    projectionMatrix = glm::perspective(glm::radians(camera->getFOV()), 1280.0f / 720.0f, 0.1f, 300.0f);
+
+    // view matrix
+    camera->update();
+    viewMatrix = camera->getViewMatrix();
+
+
+
+    //**********************************************************************
+    // view space light positions
+    //**********************************************************************
+
+    // direction of directional light
+    lightDirection = glm::vec3(-2.0f, -1.0f, -0.0f);
+
+    // determine positions in view space
+    normalMatrix = (glm::transpose(glm::inverse(camera->getViewMatrix())));
+
+    vsLightPosition = glm::vec3(viewMatrix * glm::vec4(lightPosition, 1.0f));
+    vsLightDirection = glm::vec3(normalMatrix * lightDirection);
+    vsPlayerPosition = glm::vec3(viewMatrix * glm::vec4(camera->getPlayerPOVPosition(), 1.0f));
+    vsPlayerFront = glm::vec3(normalMatrix * camera->getPlayerPOVFront());
+
+    //**********************************************************************
+    // light source shader
+    //**********************************************************************
+
+    lightsourceShader.use();
+    lightsourceShader.setVec3v("lightSourceColor", redLight);
+    lightsourceShader.setMat4("view", viewMatrix);
+    lightsourceShader.setMat4("projection", projectionMatrix);
+
+    //**********************************************************************
+    // lighting shader (material)
+    //**********************************************************************
+
+    lightShader.use();
+    setUpLightingShader(lightShader);
+
+    // set material properties
+    lightShader.setVec3("material.ambient", 0.0f, 1.0f, 0.6f);
+    lightShader.setVec3("material.diffuse", 0.0f, 1.0f, 1.0);
+    lightShader.setVec3("material.specular", 0.5, 0.5, 0.5);
+    lightShader.setFloat("material.shininess", 32.0f);
+
+    // set transformations
+    lightShader.setMat4("view", viewMatrix);
+    lightShader.setMat4("projection", projectionMatrix);
+
+    glCheckError();
+
+    //**********************************************************************
+    // lighting shader
+    //**********************************************************************
+    lightingShader.use();
+    setUpLightingShader(lightingShader);
+
+    // set material properties
+    lightingShader.setVec3("material.specular", 0.5, 0.5, 0.5);
+    lightingShader.setFloat("material.shininess", 32.0f);
+
+    // set transformations
+    lightingShader.setMat4("view", camera->getViewMatrix());
+    lightingShader.setMat4("projection", projectionMatrix);
+
+    borderShader.use();
+    borderShader.setMat4("view", camera->getViewMatrix());
+    borderShader.setMat4("projection", projectionMatrix);
+
+    glCheckError();
+
+    lightingShader.use();
+    // draw game objects using lighting shader
+    //game.draw(lightingShader, borderShader);
+}
+
+void Game::setUpLightingShader(Shader &shader) {
+    // light source
+    glm::vec3 ambientWhite = whiteLight * glm::vec3(0.1f); 
+    glm::vec3 diffuseWhite = whiteLight * glm::vec3(0.8f); 
+    glm::vec3 specularWhite = whiteLight * glm::vec3(1.0f); 
+
+    glm::vec3 ambientRed = redLight * glm::vec3(0.1f); 
+    glm::vec3 diffuseRed = redLight * glm::vec3(0.8f); 
+    glm::vec3 specularRed = redLight * glm::vec3(1.0f); 
+
+    float attenuationConstant = 1.0f;
+    float attenuationLinear = 0.014f;
+    float attenuationQuadratic = 0.0007f;
+
+    glCheckError();
+
+    // directional light
+    shader.setVec3v("directionalLight.direction", vsLightDirection);
+    shader.setVec3v("directionalLight.ambient", 0.1f * ambientWhite);
+    shader.setVec3v("directionalLight.diffuse", 0.1f * diffuseWhite);
+    shader.setVec3v("directionalLight.specular", 0.1f * specularWhite);
+
+    glCheckError();
+
+    // point light
+    shader.setVec3v("pointLights[0].position", vsLightPosition);
+    shader.setVec3v("pointLights[0].ambient", ambientRed);
+    shader.setVec3v("pointLights[0].diffuse", diffuseRed);
+    shader.setVec3v("pointLights[0].specular", specularRed);
+    shader.setFloat("pointLights[0].constant", attenuationConstant);
+    shader.setFloat("pointLights[0].linear", attenuationLinear);
+    shader.setFloat("pointLights[0].quadratic", attenuationQuadratic);	
+
+    glCheckError();
+
+    // flashlight
+    shader.setVec3v("spotLight.position", vsPlayerPosition);
+    shader.setVec3v("spotLight.direction", vsPlayerFront);
+    shader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+    shader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+    if (flashlight) {
+        shader.setFloat("spotLight.enabled", 1.0f);
+    } else {
+        shader.setFloat("spotLight.enabled", 0.0f);
+    }
+    shader.setVec3v("spotLight.ambient", ambientWhite);
+    shader.setVec3v("spotLight.diffuse", diffuseWhite);
+    shader.setVec3v("spotLight.specular", specularWhite);
+    shader.setFloat("spotLight.constant", attenuationConstant);
+    shader.setFloat("spotLight.linear", attenuationLinear);
+    shader.setFloat("spotLight.quadratic", attenuationQuadratic);	
+
+    glCheckError();
 }

@@ -32,12 +32,8 @@ bool firstMouse = true;
 
 Camera camera;
 
-bool flashlight = false;
 bool keyCPressed = false;
 bool keyFPressed = false;
-
-glm::vec3 whiteLight(1.0f, 1.0f, 1.0f);
-glm::vec3 redLight(1.0f, 0.0f, 0.0f);
 
 void setUpLightingShader(Shader &shader,
                          const glm::vec3 &vsLightDirection,
@@ -69,7 +65,7 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
     camera.adjustDistance(-0.5f * (float)yoffset);
 }
 
-void processInput(GLFWwindow *window) {
+void processInput(GLFWwindow *window, Game &game) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
@@ -117,7 +113,7 @@ void processInput(GLFWwindow *window) {
 
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
         if (!keyFPressed) {
-            flashlight = !flashlight;
+            game.flashlight = !game.flashlight;
             keyFPressed = true;
         }
     } else {
@@ -159,7 +155,7 @@ int main(int argc, char *argv[]) {
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
     std::cout << "Maximum number of vertex attributes supported: " << nrAttributes << std::endl;
 
-    Game game(camera);
+    Game game(&camera);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_STENCIL_TEST);
@@ -174,7 +170,7 @@ int main(int argc, char *argv[]) {
         lastFrame = currentFrame;
 
         // process input
-        processInput(window);
+        processInput(window, game);
         game.simulateGravity(deltaTime);
 
         glCheckError();
@@ -187,103 +183,12 @@ int main(int argc, char *argv[]) {
 
         glCheckError();
 
-        //**********************************************************************
-        // matrices
-        //**********************************************************************
+        game.processGameLogic((float)glfwGetTime());
 
-        // projection matrix
-        glm::mat4 projectionMatrix = glm::perspective(glm::radians(camera.getFOV()), 1280.0f / 720.0f, 0.1f, 300.0f);
-
-        // view matrix
-        camera.update();
-        glm::mat4 viewMatrix = camera.getViewMatrix();
-
-        //**********************************************************************
-        // (view space) light positions
-        //**********************************************************************
-
-        // determine position of point light
-        float angle = 20.0f * (float)glfwGetTime();
-        glm::mat4 matrix = glm::mat4(1.0f);
-        matrix = glm::translate(matrix, glm::vec3(100.0f, 40.0f, 100.0f));
-        matrix = glm::rotate(matrix, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
-
-        glm::vec3 lightPosition(matrix * glm::vec4(75.0f, 1.0f, 0.0f, 1.0f)); 
-
-        // direction of directional light
-        glm::vec3 lightDirection(-2.0f, -1.0f, -0.0f);
-
-        // determine positions in view space
-        glm::mat3 normalMatrix(glm::transpose(glm::inverse(camera.getViewMatrix())));
-
-        glm::vec3 vsLightPosition = glm::vec3(viewMatrix * glm::vec4(lightPosition, 1.0f));
-        glm::vec3 vsLightDirection(normalMatrix * lightDirection);
-        glm::vec3 vsPlayerPosition(viewMatrix * glm::vec4(camera.getPlayerPOVPosition(), 1.0f));
-        glm::vec3 vsPlayerFront(normalMatrix * camera.getPlayerPOVFront());
-
-        //**********************************************************************
-        // light source shader
-        //**********************************************************************
-
-        // draw cube representing point light
-        glm::mat4 modelMatrix = glm::mat4(1.0f);
-        modelMatrix = glm::translate(modelMatrix, lightPosition);
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.2f));
-    
-        game.lightsourceShader.use();
-        game.lightsourceShader.setVec3v("lightSourceColor", redLight);
-        game.lightsourceShader.setMat4("view", viewMatrix);
-        game.lightsourceShader.setMat4("projection", projectionMatrix);
-        game.lightsourceShader.setMat4("model", modelMatrix);
-
-        //crateModel.draw(game.lightsourceShader);
-
-        //**********************************************************************
-        // lighting shader (material)
-        //**********************************************************************
-
-        game.lightShader.use();
-        setUpLightingShader(game.lightShader, vsLightDirection, vsLightPosition, vsPlayerPosition, vsPlayerFront);
-
-        // set material properties
-        game.lightShader.setVec3("material.ambient", 0.0f, 1.0f, 0.6f);
-        game.lightShader.setVec3("material.diffuse", 0.0f, 1.0f, 1.0);
-        game.lightShader.setVec3("material.specular", 0.5, 0.5, 0.5);
-        game.lightShader.setFloat("material.shininess", 32.0f);
-
-        // set transformations
-        game.lightShader.setMat4("view", viewMatrix);
-        game.lightShader.setMat4("projection", projectionMatrix);
+        game.setUpShaders();
 
         glCheckError();
 
-        //**********************************************************************
-        // lighting shader
-        //**********************************************************************
-        game.lightingShader.use();
-        setUpLightingShader(game.lightingShader, vsLightDirection, vsLightPosition, vsPlayerPosition, vsPlayerFront);
-
-        // set material properties
-        game.lightingShader.setVec3("material.specular", 0.5, 0.5, 0.5);
-        game.lightingShader.setFloat("material.shininess", 32.0f);
-
-        // set transformations
-        game.lightingShader.setMat4("view", camera.getViewMatrix());
-        game.lightingShader.setMat4("projection", projectionMatrix);
-
-        game.processGameLogic((float)glfwGetTime(), lightPosition);
-
-        glCheckError();
-
-        game.borderShader.use();
-        game.borderShader.setMat4("view", camera.getViewMatrix());
-        game.borderShader.setMat4("projection", projectionMatrix);
-    
-        glCheckError();
-
-        game.lightingShader.use();
-        // draw game objects using lighting shader
-        //game.draw(lightingShader, borderShader);
         game.draw();
 
         glCheckError();
@@ -300,61 +205,3 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-void setUpLightingShader(Shader &shader,
-                         const glm::vec3 &vsLightDirection,
-                         const glm::vec3 &vsLightPosition,
-                         const glm::vec3 &vsPlayerPosition,
-                         const glm::vec3 &vsPlayerFront) {
-    // light source
-    glm::vec3 ambientWhite = whiteLight * glm::vec3(0.1f); 
-    glm::vec3 diffuseWhite = whiteLight * glm::vec3(0.8f); 
-    glm::vec3 specularWhite = whiteLight * glm::vec3(1.0f); 
-
-    glm::vec3 ambientRed = redLight * glm::vec3(0.1f); 
-    glm::vec3 diffuseRed = redLight * glm::vec3(0.8f); 
-    glm::vec3 specularRed = redLight * glm::vec3(1.0f); 
-
-    float attenuationConstant = 1.0f;
-    float attenuationLinear = 0.014f;
-    float attenuationQuadratic = 0.0007f;
-
-    glCheckError();
-
-    // directional light
-    shader.setVec3v("directionalLight.direction", vsLightDirection);
-    shader.setVec3v("directionalLight.ambient", 0.1f * ambientWhite);
-    shader.setVec3v("directionalLight.diffuse", 0.1f * diffuseWhite);
-    shader.setVec3v("directionalLight.specular", 0.1f * specularWhite);
-
-    glCheckError();
-
-    // point light
-    shader.setVec3v("pointLights[0].position", vsLightPosition);
-    shader.setVec3v("pointLights[0].ambient", ambientRed);
-    shader.setVec3v("pointLights[0].diffuse", diffuseRed);
-    shader.setVec3v("pointLights[0].specular", specularRed);
-    shader.setFloat("pointLights[0].constant", attenuationConstant);
-    shader.setFloat("pointLights[0].linear", attenuationLinear);
-    shader.setFloat("pointLights[0].quadratic", attenuationQuadratic);	
-
-    glCheckError();
-
-    // flashlight
-    shader.setVec3v("spotLight.position", vsPlayerPosition);
-    shader.setVec3v("spotLight.direction", vsPlayerFront);
-    shader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-    shader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
-    if (flashlight) {
-        shader.setFloat("spotLight.enabled", 1.0f);
-    } else {
-        shader.setFloat("spotLight.enabled", 0.0f);
-    }
-    shader.setVec3v("spotLight.ambient", ambientWhite);
-    shader.setVec3v("spotLight.diffuse", diffuseWhite);
-    shader.setVec3v("spotLight.specular", specularWhite);
-    shader.setFloat("spotLight.constant", attenuationConstant);
-    shader.setFloat("spotLight.linear", attenuationLinear);
-    shader.setFloat("spotLight.quadratic", attenuationQuadratic);	
-
-    glCheckError();
-}
