@@ -4,20 +4,20 @@
 #include <vector>
 
 #include "camera.h"
+
 #include "gameobject.h"
 #include "heightmap.h"
 #include "shader.h"
-
-class Camera;
 
 class Game {
 private:
     std::vector<GameObject*> gameObjects;
     HeightMap heightMap;
     GameObject *mapObject;
-    Camera *camera;
-    
+
 public:
+    Camera camera;
+    
     // Game-specific objects
     Shader lightsourceShader;
     Shader lightShader;
@@ -43,7 +43,7 @@ public:
     bool flashlight;
 
 public:
-    Game(Camera *camera);
+    Game();
 
     void addGameObject(GameObject *object);
     void setMapObject(GameObject *object);

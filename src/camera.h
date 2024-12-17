@@ -5,7 +5,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "gameobject.h"
-#include "game.h"
 #include "constants.h"
 
 class Camera {

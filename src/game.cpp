@@ -2,14 +2,13 @@
 
 #include "gl.h"
 
-Game::Game(Camera *camera)
+Game::Game()
     : lightsourceShader("shaders/light.vs", "shaders/lightsource.fs"),
       lightShader("shaders/materialLighting.vs", "shaders/materialLighting.fs"),
       lightingShader("shaders/lighting.vs", "shaders/lighting.fs"),
       borderShader("shaders/materialLighting.vs", "shaders/border.fs"),
       whiteLight(1.0f, 1.0f, 1.0f),
       redLight(1.0f, 0.0f, 0.0f) {
-    this->camera = camera;
     this->flashlight = false;
 
     // generate height map and create model from it
@@ -37,7 +36,7 @@ Game::Game(Camera *camera)
     playerObject->setYawOffset(90.0f);
     playerObject->setPosition(glm::vec3(0.0f, 10.0f, 0.0f));
     playerObject->setDirection(45.0f, 0.0f);
-    this->camera->attachToPlayer(playerObject);
+    camera.attachToPlayer(playerObject);
     addGameObject(playerObject);
 
     // material cube on top of mountain
@@ -174,11 +173,11 @@ void Game::setUpShaders() {
     //**********************************************************************
 
     // projection matrix
-    projectionMatrix = glm::perspective(glm::radians(camera->getFOV()), 1280.0f / 720.0f, 0.1f, 300.0f);
+    projectionMatrix = glm::perspective(glm::radians(camera.getFOV()), 1280.0f / 720.0f, 0.1f, 300.0f);
 
     // view matrix
-    camera->update();
-    viewMatrix = camera->getViewMatrix();
+    camera.update();
+    viewMatrix = camera.getViewMatrix();
 
 
 
@@ -190,12 +189,12 @@ void Game::setUpShaders() {
     lightDirection = glm::vec3(-2.0f, -1.0f, -0.0f);
 
     // determine positions in view space
-    normalMatrix = (glm::transpose(glm::inverse(camera->getViewMatrix())));
+    normalMatrix = (glm::transpose(glm::inverse(camera.getViewMatrix())));
 
     vsLightPosition = glm::vec3(viewMatrix * glm::vec4(lightPosition, 1.0f));
     vsLightDirection = glm::vec3(normalMatrix * lightDirection);
-    vsPlayerPosition = glm::vec3(viewMatrix * glm::vec4(camera->getPlayerPOVPosition(), 1.0f));
-    vsPlayerFront = glm::vec3(normalMatrix * camera->getPlayerPOVFront());
+    vsPlayerPosition = glm::vec3(viewMatrix * glm::vec4(camera.getPlayerPOVPosition(), 1.0f));
+    vsPlayerFront = glm::vec3(normalMatrix * camera.getPlayerPOVFront());
 
     //**********************************************************************
     // light source shader
@@ -236,11 +235,11 @@ void Game::setUpShaders() {
     lightingShader.setFloat("material.shininess", 32.0f);
 
     // set transformations
-    lightingShader.setMat4("view", camera->getViewMatrix());
+    lightingShader.setMat4("view", camera.getViewMatrix());
     lightingShader.setMat4("projection", projectionMatrix);
 
     borderShader.use();
-    borderShader.setMat4("view", camera->getViewMatrix());
+    borderShader.setMat4("view", camera.getViewMatrix());
     borderShader.setMat4("projection", projectionMatrix);
 
     glCheckError();

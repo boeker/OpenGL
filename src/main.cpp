@@ -11,15 +11,7 @@
 
 #include "gl.h"
 
-#include "shader.h"
-#include "camera.h"
-#include "heightmap.h"
 #include "game.h"
-#include "gameobject.h"
-
-#include "texture.h"
-#include "model.h"
-#include "mesh.h"
 
 #include "constants.h"
 
@@ -30,10 +22,10 @@ float lastX = 640;
 float lastY = 360;
 bool firstMouse = true;
 
-Camera camera;
-
 bool keyCPressed = false;
 bool keyFPressed = false;
+
+Game *gamePtr;
 
 void setUpLightingShader(Shader &shader,
                          const glm::vec3 &vsLightDirection,
@@ -58,52 +50,52 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
     lastX = xpos;
     lastY = ypos;
     
-    camera.processDirectionChange(xoffset,  yoffset);
+    gamePtr->camera.processDirectionChange(xoffset,  yoffset);
 }
 
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
-    camera.adjustDistance(-0.5f * (float)yoffset);
+    gamePtr->camera.adjustDistance(-0.5f * (float)yoffset);
 }
 
-void processInput(GLFWwindow *window, Game &game) {
+void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
 
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        camera.processMovement(Direction::FORWARD, deltaTime);
+        gamePtr->camera.processMovement(Direction::FORWARD, deltaTime);
     }
 
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        camera.processMovement(Direction::BACKWARD, deltaTime);
+        gamePtr->camera.processMovement(Direction::BACKWARD, deltaTime);
     }
 
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        camera.processMovement(Direction::LEFT, deltaTime);
+        gamePtr->camera.processMovement(Direction::LEFT, deltaTime);
     }
 
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        camera.processMovement(Direction::RIGHT, deltaTime);
+        gamePtr->camera.processMovement(Direction::RIGHT, deltaTime);
     }
 
-    camera.setSprinting(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS);
+    gamePtr->camera.setSprinting(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS);
     
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-        camera.processMovement(Direction::UPWARD, deltaTime);
+        gamePtr->camera.processMovement(Direction::UPWARD, deltaTime);
     }
 
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
-        camera.processMovement(Direction::DOWNWARD, deltaTime);
+        gamePtr->camera.processMovement(Direction::DOWNWARD, deltaTime);
     }
 
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-        //camera.velocity += -0.22f;
+        //gamePtr->camera.velocity += -0.22f;
     }
 
     if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
         if (!keyCPressed) {
-            camera.setFollowing(!camera.isFollowing());
+            gamePtr->camera.setFollowing(!gamePtr->camera.isFollowing());
             keyCPressed = true;
         }
     } else {
@@ -113,7 +105,7 @@ void processInput(GLFWwindow *window, Game &game) {
 
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
         if (!keyFPressed) {
-            game.flashlight = !game.flashlight;
+            gamePtr->flashlight = !gamePtr->flashlight;
             keyFPressed = true;
         }
     } else {
@@ -155,13 +147,14 @@ int main(int argc, char *argv[]) {
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
     std::cout << "Maximum number of vertex attributes supported: " << nrAttributes << std::endl;
 
-    Game game(&camera);
-
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_STENCIL_TEST);
 
     // wireframe mode
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    Game game;
+    gamePtr = &game;
 
     // render loop
     while (!glfwWindowShouldClose(window)) {
@@ -170,7 +163,7 @@ int main(int argc, char *argv[]) {
         lastFrame = currentFrame;
 
         // process input
-        processInput(window, game);
+        processInput(window);
         game.simulateGravity(deltaTime);
 
         glCheckError();
