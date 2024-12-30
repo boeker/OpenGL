@@ -22,6 +22,7 @@ public:
     Shader lightsourceShader;
     Shader lightShader;
     Shader lightingShader;
+    Shader transparencyShader;
     Shader borderShader;
     std::vector<GameObject*> rotatingCrates;
     GameObject *lightSourceObject;
@@ -42,17 +43,20 @@ public:
     glm::vec3 vsPlayerFront;
     bool flashlight;
 
+    std::vector<GameObject*> vegetation;
+
+private:
+    void setUpLightingShader(Shader &shader);
+
 public:
     Game();
 
     void addGameObject(GameObject *object);
-    void setMapObject(GameObject *object);
     void simulateGravity(float deltaTime);
     void draw(Shader &shader);
     void draw();
     void processGameLogic(float time);
     void setUpShaders();
-    void setUpLightingShader(Shader &shader);
 };
 
 #endif

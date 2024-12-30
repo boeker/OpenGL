@@ -8,8 +8,8 @@ struct Texture {
     std::string type;
     std::string pathOfFile;
 
-    static unsigned int createTextureIDFromFile(const std::string &path);
-    static Texture createTextureFromFile(const std::string &path, const std::string &type);
+    static unsigned int createTextureIDFromFile(const std::string &path, bool alpha);
+    static Texture createTextureFromFile(const std::string &path, const std::string &type, bool alpha = false);
 };
 
 #endif

@@ -6,6 +6,7 @@ Game::Game()
     : lightsourceShader("shaders/light.vs", "shaders/lightsource.fs"),
       lightShader("shaders/materialLighting.vs", "shaders/materialLighting.fs"),
       lightingShader("shaders/lighting.vs", "shaders/lighting.fs"),
+      transparencyShader("shaders/lighting.vs", "shaders/transparency.fs"),
       borderShader("shaders/materialLighting.vs", "shaders/border.fs"),
       whiteLight(1.0f, 1.0f, 1.0f),
       redLight(1.0f, 0.0f, 0.0f) {
@@ -22,8 +23,6 @@ Game::Game()
     // Load backpack model and use it as player object
     Model *backpack = new Model;
     backpack->loadModel("models/backpack/backpack.obj");
-
-    Texture wall = Texture::createTextureFromFile("textures/wall.jpg", "texture_diffuse");
 
     Model *crateModel = new Model(Mesh::cubeMesh());
 
@@ -94,14 +93,20 @@ Game::Game()
     lightSourceObject->setGravity(false);
     lightSourceObject->setScale(0.2f);
     addGameObject(lightSourceObject);
+
+    // vegetation
+    Model *grassModel = new Model(Mesh::vegetationMesh());
+
+    GameObject *grass = new GameObject(grassModel);
+    grass->setShader(&transparencyShader);
+    grass->setPosition(glm::vec3(6.0f, 3.0f, 5.0f));
+    grass->setHeightOffset(0.5f);
+    grass->setGravity(true);
+    addGameObject(grass);
 }
 
 void Game::addGameObject(GameObject *object) {
     gameObjects.push_back(object);
-}
-
-void Game::setMapObject(GameObject *object) {
-    mapObject = object;
 }
 
 void Game::simulateGravity(float deltaTime) {
@@ -238,15 +243,33 @@ void Game::setUpShaders() {
     lightingShader.setMat4("view", camera.getViewMatrix());
     lightingShader.setMat4("projection", projectionMatrix);
 
+    glCheckError();
+
+    //**********************************************************************
+    // transparency shader
+    //**********************************************************************
+    transparencyShader.use();
+    setUpLightingShader(transparencyShader);
+
+    // set material properties
+    transparencyShader.setVec3("material.specular", 0.5, 0.5, 0.5);
+    transparencyShader.setFloat("material.shininess", 32.0f);
+
+    // set transformations
+    transparencyShader.setMat4("view", camera.getViewMatrix());
+    transparencyShader.setMat4("projection", projectionMatrix);
+
+    glCheckError();
+
+    //**********************************************************************
+    // border shader
+    //**********************************************************************
+
     borderShader.use();
     borderShader.setMat4("view", camera.getViewMatrix());
     borderShader.setMat4("projection", projectionMatrix);
 
     glCheckError();
-
-    lightingShader.use();
-    // draw game objects using lighting shader
-    //game.draw(lightingShader, borderShader);
 }
 
 void Game::setUpLightingShader(Shader &shader) {

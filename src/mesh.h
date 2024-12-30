@@ -42,6 +42,7 @@ public:
                                                            std::string typeName,
                                                            std::string &directory); 
     static Mesh cubeMesh();
+    static Mesh vegetationMesh();
 };
 
 #endif

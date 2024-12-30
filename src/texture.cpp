@@ -7,7 +7,7 @@
 
 #include "gl.h"
 
-unsigned int Texture::createTextureIDFromFile(const std::string &path) {
+unsigned int Texture::createTextureIDFromFile(const std::string &path, bool alpha) {
     std::cout << "INFO::MESH Loading texture " << path << std::endl;
 
     // generate texture
@@ -22,8 +22,14 @@ unsigned int Texture::createTextureIDFromFile(const std::string &path) {
     glCheckError();
 
     // set the texture wrapping/filtering options (on the currently bound texture object)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    if (alpha) {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    } else {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    }
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -46,7 +52,7 @@ unsigned int Texture::createTextureIDFromFile(const std::string &path) {
             format = GL_RGBA;
         }
     
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     } else {
         std::cerr << "ERROR::TEXTURE::FILE_NOT_SUCCESSFULLY_READ" << std::endl;
@@ -57,9 +63,9 @@ unsigned int Texture::createTextureIDFromFile(const std::string &path) {
     return textureID;
 }
 
-Texture Texture::createTextureFromFile(const std::string &path, const std::string &type) {
+Texture Texture::createTextureFromFile(const std::string &path, const std::string &type, bool alpha) {
     Texture texture;
-    texture.id = createTextureIDFromFile(path);
+    texture.id = createTextureIDFromFile(path, alpha);
     texture.type = type;
     texture.pathOfFile = path;
 

@@ -235,3 +235,39 @@ Mesh Mesh::cubeMesh() {
 
     return Mesh(vertices, indices, textures);
 }
+
+Mesh Mesh::vegetationMesh() {
+    float cubeVertices[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, 
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, 
+
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, 
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, 
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.499f,  0.0f,  0.0f, 1.0f, 0.0f, 0.0f,
+         0.5f, -0.5f, -0.499f,  0.0f,  0.0f, 1.0f, 1.0f, 0.0f, 
+         0.5f,  0.5f, -0.499f,  0.0f,  0.0f, 1.0f, 1.0f, 1.0f, 
+
+         0.5f,  0.5f, -0.499f,  0.0f,  0.0f, 1.0f, 1.0f, 1.0f, 
+        -0.5f,  0.5f, -0.499f,  0.0f,  0.0f, 1.0f, 0.0f, 1.0f, 
+        -0.5f, -0.5f, -0.499f,  0.0f,  0.0f, 1.0f, 0.0f, 0.0f
+    };
+
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+    Vertex *asVertices = (Vertex*)cubeVertices;
+    for (int i = 0; i < 12; ++i) {
+        vertices.push_back(asVertices[i]);
+        indices.push_back(i);
+    }
+
+    std::vector<Texture> textures;
+    Texture grass = Texture::createTextureFromFile("textures/grass.png", "texture_diffuse", true);
+    Texture grassSpec = Texture::createTextureFromFile("textures/grass.png", "texture_specular", true);
+    textures.push_back(grass);
+    textures.push_back(grassSpec);
+
+    return Mesh(vertices, indices, textures);
+}
